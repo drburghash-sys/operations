@@ -1,0 +1,1579 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Operations Database V2</title>
+<style>
+:root{
+  --bg:#eef3f5;--card:#fff;--ink:#17212b;--mut:#667785;--line:#d9e2e6;
+  --brand:#0b5266;--brand2:#11718a;--blue:#dfeef4;--green:#e2f4e7;--greenText:#17663c;
+  --amber:#fff0cc;--amberText:#8a6200;--orange:#fde4cf;--orangeText:#944b13;
+  --red:#fde2df;--redText:#9a352b;--purple:#eee5f4;--gray:#edf0f2
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;color:var(--ink)}
+header{position:sticky;top:0;z-index:30;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;padding:14px 16px}
+.head{max-width:1200px;margin:auto;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.brand h1{font-size:21px;margin:0}.brand p{font-size:12px;margin:3px 0 0;opacity:.9}
+.roleBox{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.roleBox select{width:auto;min-width:190px}
+main{max-width:1200px;margin:auto;padding:14px 12px 100px}
+nav{display:flex;gap:7px;overflow:auto;padding-bottom:8px;margin-bottom:10px}
+nav button{white-space:nowrap;background:#fff;border:1px solid var(--line);color:var(--ink)}
+nav button.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+button,input,select,textarea{font:inherit}
+button{border:0;border-radius:11px;padding:10px 12px;font-weight:800;cursor:pointer}
+input,select,textarea{width:100%;border:1px solid var(--line);background:#fff;border-radius:11px;padding:10px;color:var(--ink)}
+textarea{min-height:86px}
+label{display:block;font-size:12px;font-weight:800;color:var(--mut);margin:7px 2px 5px}
+.card{background:var(--card);border-radius:16px;padding:14px;margin:10px 0;box-shadow:0 2px 12px #102a3810}
+.title{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.title h2,.title h3{margin:0}
+.muted{color:var(--mut);font-size:12px}.notice{background:#fff8e7;border:1px solid #ecd28d;color:#71530b;padding:10px;border-radius:12px;font-size:12px}
+.grid{display:grid;gap:9px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.primary{background:var(--brand);color:#fff}.secondary{background:var(--blue);color:var(--brand)}.ok{background:var(--green);color:var(--greenText)}
+.warn{background:var(--amber);color:var(--amberText)}.orange{background:var(--orange);color:var(--orangeText)}
+.danger{background:var(--red);color:var(--redText)}.ghost{background:var(--gray);color:#4f5d66}
+.actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.actions button{padding:8px 10px;font-size:12px}
+.badge{display:inline-block;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:800;margin:2px}
+.b-elective{background:#dfeef4;color:#0b5266}.b-day{background:#eee5f4;color:#65427a}.b-inpatient{background:#fde4cf;color:#944b13}.b-emergency{background:#fde2df;color:#9a352b}.b-ready{background:#e2f4e7;color:#17663c}.b-pending{background:#fff0cc;color:#8a6200}.b-closed{background:#edf0f2;color:#59656d}
+.page{display:none}.page.on{display:block}.hidden{display:none!important}
+.case{border:1px solid var(--line);border-radius:14px;padding:12px;margin:8px 0;background:#fff}
+.case h3{margin:0 0 4px;font-size:16px}.meta{font-size:12px;color:var(--mut);line-height:1.6}
+.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px;text-align:center}.stat b{display:block;font-size:24px;color:var(--brand)}.stat span{font-size:11px;color:var(--mut)}
+.modal{position:fixed;inset:0;background:#0008;display:flex;align-items:center;justify-content:center;z-index:80;padding:12px}.modal.hidden{display:none}.modalBox{background:#fff;width:min(96%,760px);max-height:92vh;overflow:auto;border-radius:18px;padding:16px}
+.timeline{border-right:3px solid #dbe4e8;padding-right:14px}.event{position:relative;padding:4px 0 12px}.event:before{content:"";position:absolute;right:-20px;top:9px;width:9px;height:9px;background:var(--brand);border-radius:50%}
+.docgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.docbox{border:2px solid var(--line);border-radius:16px;padding:14px;background:#fff}
+.docbox.checked{border-color:#77b98d;background:#f1fbf4}.docbox label{font-size:15px;color:var(--ink);display:flex;gap:10px;align-items:center;margin:0}
+.docbox input{width:auto;transform:scale(1.3)}
+.reqrow{display:grid;grid-template-columns:minmax(0,1fr) 90px;gap:8px;align-items:center;padding:6px 0}
+.patient-msg{direction:rtl;text-align:right;min-height:135px;line-height:1.8;font-family:Tahoma,Arial,sans-serif}
+.weekDay{border:1px solid var(--line);border-radius:16px;background:#fff;padding:12px;margin:12px 0}.weekDayHead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.roomGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.roomCard{border:1px solid var(--line);border-radius:14px;padding:10px;background:#f9fbfc}
+.patientRow{border-top:1px solid var(--line);padding:9px 0}.patientData{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 10px;font-size:12px}
+.patientData b{color:var(--mut)}
+.date3{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:6px}
+@media(max-width:820px){.g2,.g3,.g4,.roomGrid,.patientData,.docgrid{grid-template-columns:1fr}.statgrid{grid-template-columns:repeat(2,1fr)}}
+.surgeon-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+.surgeon-case{position:relative;min-height:185px;border:0;border-left:9px solid var(--stage);border-radius:16px;padding:14px;background:var(--stage-bg);box-shadow:0 3px 14px #102a3814;cursor:pointer;text-align:left;transition:.15s transform,.15s box-shadow}
+.surgeon-case:hover{transform:translateY(-2px);box-shadow:0 7px 20px #102a3822}.surgeon-case:focus{outline:3px solid #11718a55;outline-offset:2px}
+.surgeon-case h3{margin:0 0 5px;font-size:17px}.surgeon-case .procedure{font-weight:800;margin:9px 0 5px}.surgeon-case .stage-label{display:inline-block;background:var(--stage);color:#fff;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:900}
+.surgeon-case .open-hint{position:absolute;right:13px;bottom:11px;font-size:11px;color:var(--mut);font-weight:800}.surgeon-case .date{margin-top:7px;font-size:12px}
+.surgeon-case.pdf-excluded{opacity:.42;filter:grayscale(.65)}.pdf-toggle{position:absolute;left:12px;bottom:8px;padding:6px 8px!important;font-size:10px!important;z-index:2}.return-reason{border:1px solid #dfb04b;background:#fff7df;border-radius:12px;padding:10px;margin:10px 0}.return-reason b{color:#8a6200}
+.room-v5{border-top:7px solid var(--brand)}.room-v5.day-room{border-top-color:#7a4aa8}.room-v5 .room-case{border:1px solid var(--line);border-radius:12px;padding:10px;margin:8px 0;background:#fff}.room-v5 .room-case-time{font-size:18px;font-weight:900;color:var(--brand)}.room-v5 .room-case-grid{display:grid;grid-template-columns:110px 1.2fr 1fr 1.2fr 1fr;gap:8px;align-items:center}.trash-case{border-right:8px solid #a33b35}.danger-zone{border:1px solid #e2aaa5;background:#fff5f4}@media(max-width:820px){.room-v5 .room-case-grid{grid-template-columns:1fr 1fr}.room-v5 .room-case-grid>div:nth-child(2){grid-column:1/-1}}
+.room-capacity{display:flex;gap:7px;flex-wrap:wrap;align-items:center}.room-capacity .free{background:#dff4e5;color:#176538}.room-capacity .full{background:#fde5e2;color:#9b3029}.or-detail-grid{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:8px;margin-top:10px}.or-field{border-top:1px solid var(--line);padding-top:7px;min-width:0}.or-field b{display:block;font-size:11px;color:var(--mut);text-transform:uppercase;margin-bottom:3px}.or-field span{display:block;overflow-wrap:anywhere}.vacant-slot{width:100%;min-height:74px;border:2px dashed #63a882;background:#effaf3;color:#176538;border-radius:14px;margin:8px 0;font-weight:900;font-size:16px}.vacant-slot:hover{background:#dff4e5}.ready-patient{width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px;margin:7px 0}.ready-patient:hover{border-color:var(--brand);background:#eff8fa}@media(max-width:900px){.or-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.or-detail-grid{grid-template-columns:1fr 1fr}.or-field.patient-wide{grid-column:1/-1}}
+.day-filter{display:grid;grid-template-columns:repeat(5,minmax(105px,1fr));gap:8px;margin:10px 0 14px}.day-filter button{background:#fff;border:1px solid var(--line);border-radius:13px;padding:10px 7px;color:var(--ink)}.day-filter button b{display:block;font-size:14px}.day-filter button span{display:block;margin-top:3px;font-size:11px;color:var(--mut)}.day-filter button.active{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 4px 13px #0b526633}.day-filter button.active span{color:#d9f3f8}@media(max-width:650px){.day-filter{display:flex;overflow-x:auto;padding-bottom:4px}.day-filter button{min-width:112px;flex:0 0 auto}}
+.stage-preparation{--stage:#d89000;--stage-bg:#fff7df}.stage-anesthesia{--stage:#7254b3;--stage-bg:#f3efff}.stage-surgeon{--stage:#1877b7;--stage-bg:#eaf6ff}.stage-final{--stage:#008d8d;--stage-bg:#e7f9f8}.stage-operation{--stage:#d85a18;--stage-bg:#fff0e7}.stage-completed{--stage:#27834b;--stage-bg:#eaf8ef}.stage-cancelled{--stage:#b13c37;--stage-bg:#ffedeb}
+.legend{display:flex;gap:7px;flex-wrap:wrap}.legend span{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800}.legend i{width:11px;height:11px;border-radius:3px;background:var(--dot)}
+.board-summary{display:grid;grid-template-columns:repeat(7,minmax(95px,1fr));gap:7px;margin:10px 0}.board-summary button{background:#fff;border:1px solid var(--line);padding:9px 6px}.board-summary button.active{outline:3px solid #11718a33}.board-summary b{display:block;font-size:20px}.board-empty{grid-column:1/-1;text-align:center;padding:28px;background:#fff;border-radius:16px;color:var(--mut)}
+@media(max-width:900px){.surgeon-board{grid-template-columns:repeat(2,minmax(0,1fr))}.board-summary{grid-template-columns:repeat(4,minmax(80px,1fr))}}
+@media(max-width:560px){.surgeon-board{grid-template-columns:1fr}.board-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media print{
+  body{background:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}header,nav,.page:not(#surgeonBoard),#surgeonBoard .board-controls,#surgeonBoard .open-hint,.pdf-toggle,.surgeon-case.pdf-excluded{display:none!important}main{max-width:none;padding:0}#surgeonBoard{display:block!important}#surgeonBoard .card{box-shadow:none;padding:0;margin:0 0 10px}.surgeon-board{grid-template-columns:repeat(3,1fr);gap:8px}.surgeon-case{break-inside:avoid;min-height:145px;box-shadow:none;border:1px solid #ccd6da;border-left:9px solid var(--stage);padding:10px}.surgeon-case h3{font-size:14px}.board-summary{grid-template-columns:repeat(7,1fr)}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="head">
+    <div class="brand"><h1>Operations Database</h1><p>Shared OR data prototype — V2</p></div>
+    <div class="roleBox"><span style="font-size:12px">Test role:</span>
+      <select id="roleSelect">
+        <option value="surgeon">Surgeon</option>
+        <option value="coordinator">OR Coordinator</option>
+        <option value="anesthesia">Anesthesia</option>
+        <option value="admission">Admission / Bed Office</option>
+        <option value="or">Operating Room</option>
+        <option value="admin">Administration / Statistics</option>
+      </select>
+    </div>
+  </div>
+</header>
+<main>
+<nav>
+  <button data-page="home" class="active" data-roles="all">Home</button>
+  <button data-page="newRequest" data-roles="surgeon">New Request</button>
+  <button data-page="cases" data-roles="all">Cases</button>
+  <button data-page="surgeonBoard" data-roles="all">Surgeon Case Board</button>
+  <button data-page="scheduling" data-roles="coordinator">Scheduling</button>
+  <button data-page="weekly" data-roles="all">Weekly OR Plan</button>
+  <button data-page="availability" data-roles="surgeon,coordinator,admin">Surgeon Availability</button>
+  <button data-page="oruse" data-roles="surgeon">Surgeon OR Use</button>
+  <button data-page="stats" data-roles="surgeon,admin">Statistics</button>
+  <button data-page="trash" data-roles="surgeon">Deleted Cases</button>
+  <button data-page="settings" data-roles="admin">Settings</button>
+</nav>
+<div class="card" style="margin:0 0 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+  <button class="primary" onclick="syncCasesFromGoogle()">↻ Sync Google Sheet</button>
+  <span id="cloudSyncStatus" class="muted">Google Sheet not synced yet.</span>
+</div>
+
+<section id="home" class="page on"><div id="homeStats" class="statgrid"></div><div id="homeList"></div></section>
+
+<section id="newRequest" class="page">
+  <div class="card">
+    <div class="title"><h2>New Surgical Request</h2><span class="muted">Surgeon</span></div>
+    <div class="grid g3">
+      <div><label>MRN</label><input id="mrn"></div>
+      <div><label>Patient Name</label><input id="patientName"></div>
+      <div><label>Age</label><input id="patientAge" type="number" min="0"></div>
+      <div><label>Nationality</label><input id="patientNationality" placeholder="e.g. Saudi"></div>
+      <div><label>Sex</label><select id="patientSex"><option value="">Select...</option><option value="M">Male</option><option value="F">Female</option></select></div>
+      <div><label>Unit</label><input id="patientUnit" placeholder="e.g. MSW / DSU / Inpatient"></div>
+      <input id="patientMobile" type="hidden">
+      <div><label>Surgeon</label><input id="surgeonName" value="Dr. Surgeon"></div>
+      <div><label>Specialty</label><input id="patientSpecialty" placeholder="e.g. General Surgery"></div>
+      <div><label>Diagnosis</label><input id="diagnosis"></div>
+      <div><label>Planned Procedure</label><input id="plannedProcedure"></div>
+      <div><label>Remarks</label><input id="patientRemarks"></div>
+      <div><label>Pathway</label><select id="pathway">
+        <option value="elective">Elective</option><option value="day">Day Surgery</option>
+        <option value="inpatient">Inpatient / Before Discharge</option><option value="emergency">Emergency</option>
+      </select></div>
+      <div id="anesChoiceWrap"><label>Needs Anesthesia Clinic?</label><select id="sendAnesthesia"><option value="yes">Yes</option><option value="no">No</option></select></div>
+      <div id="emergencyWrap" class="hidden"><label>Emergency Optimization</label><select id="emergencyOptimization"><option value="optimized">Optimized (3 points)</option><option value="non_optimized">Non-Optimized (4 points)</option></select></div>
+      <div><label>Minor Procedure?</label><select id="minorProcedure"><option value="no">No</option><option value="yes">Yes</option></select></div>
+      <div id="minorPointsWrap" class="hidden"><label>Minor Points</label><input id="minorPoints" type="number" min="0" value="1"></div>
+      <div><label>Expected Duration (minutes)</label><input id="expectedDuration" type="number" min="15" step="15" value="60"></div>
+    </div>
+  </div>
+
+  <div id="prepRequestCard" class="card">
+    <div class="title"><h3>Patient Preparation Requested by Surgeon</h3><span class="muted">Coordinator will follow these requests</span></div>
+    <div id="prepRequestRows"></div>
+    <div class="grid g2">
+      <div><label>Other Department</label><input id="otherDepartment" placeholder="e.g. Pulmonology"></div>
+      <div><label>Additional Requirement</label><input id="additionalRequirement" placeholder="e.g. HbA1c"></div>
+    </div>
+    <div class="notice">Final surgical documents are NOT completed here. The 3 Consents, OR Request / Booking and Admission Order (when applicable) appear later, only after anesthesia clearance.</div>
+  </div>
+  <div class="actions"><button class="primary" onclick="createRequest()">Create Request</button></div>
+</section>
+
+<section id="cases" class="page"><div class="card"><div class="grid g3"><div><label>Search</label><input id="caseSearch" oninput="renderCases()" placeholder="MRN / Name / Procedure"></div><div><label>Pathway</label><select id="pathFilter" onchange="renderCases()"><option value="">All</option><option value="elective">Elective</option><option value="day">Day Surgery</option><option value="inpatient">Inpatient</option><option value="emergency">Emergency</option></select></div><div><label>Status</label><select id="statusFilter" onchange="renderCases()"></select></div></div></div><div id="caseList"></div></section>
+
+<section id="surgeonBoard" class="page">
+  <div class="card">
+    <div class="title"><div><h2>Surgeon Case Board</h2><div class="muted">All patients assigned to one surgeon, grouped by pathway stage</div></div><div class="actions board-controls"><button class="secondary" onclick="previousDataInputV481.click()">Import Previous Cases</button><input id="previousDataInputV481" type="file" accept=".json,application/json" class="hidden" onchange="importPreviousDataV481(event)"><button class="primary" onclick="printSurgeonBoardV48()">Export / Save PDF</button></div></div>
+    <div class="grid g3 board-controls">
+      <div><label>Surgeon</label><select id="boardSurgeon" onchange="renderSurgeonBoardV48()"><option value="">Select Surgeon</option></select></div>
+      <div><label>Search</label><input id="boardSearch" oninput="renderSurgeonBoardV48()" placeholder="MRN / patient / procedure"></div>
+      <div><label>Pathway</label><select id="boardPathway" onchange="renderSurgeonBoardV48()"><option value="">All Pathways</option><option value="elective">Elective</option><option value="day">Day Surgery</option><option value="inpatient">Inpatient</option><option value="emergency">Emergency</option></select></div>
+    </div>
+    <div id="boardPrintHeading"></div><div id="boardPdfTools" class="actions board-controls"></div><div id="boardLegend" class="legend"></div><div id="boardSummary" class="board-summary"></div>
+  </div>
+  <div id="surgeonCaseGrid" class="surgeon-board"></div>
+</section>
+
+<section id="scheduling" class="page"><div class="card"><div class="title"><h2>Ready for Scheduling</h2></div><div id="scheduleList"></div></div></section>
+
+<section id="weekly" class="page">
+  <div class="card"><div class="grid g3"><div><label>Week Starting Sunday</label><input id="weekPicker" type="text" inputmode="numeric" placeholder="DD / MM / YYYY" onchange="renderWeekly()"></div><div><label>Operating Day</label><input id="roomPlanDateV51" type="date" onchange="renderWeekly()"></div><div><label>Surgeon</label><select id="weeklySurgeon" onchange="renderWeekly()"><option value="">All Surgeons</option></select></div></div></div>
+  <div id="roomDayFilterV52" class="day-filter"></div>
+  <div id="roomManager" class="card hidden"><div class="title"><h3>Additional Operating Rooms</h3><span class="muted">R1–R8 and DSU1–DSU4 are already available</span></div><div class="grid g3"><div><label>Room Name</label><input id="roomName" placeholder="e.g. R9 or DSU5"></div><div><label>Room Type</label><select id="roomType"><option value="regular">Main Operating Room</option><option value="day">Day Surgery Unit</option></select></div><div><label>Default Capacity</label><input id="roomSlots" type="number" min="0" value="3"></div></div><div class="actions"><button class="primary" onclick="addRoom()">Add Room</button></div></div>
+  <div id="weeklyBody"></div>
+</section>
+
+<section id="availability" class="page">
+  <div class="card"><div class="title"><h2>Surgeon Availability</h2><span class="muted">Leave + Next Month Day Surgery Availability</span></div>
+  <div class="grid g3">
+    <div><label>Surgeon</label><input id="availSurgeon" value="Dr. Surgeon"></div>
+    <div><label>Type</label><select id="availType" onchange="updateAvailFields()"><option value="leave">Leave</option><option value="day">Day Surgery Availability</option></select></div>
+    <div id="leaveFromWrap"><label>Leave From</label><input id="leaveFrom" type="text" inputmode="numeric" placeholder="DD / MM / YYYY"></div>
+    <div id="leaveToWrap"><label>Leave To</label><input id="leaveTo" type="text" inputmode="numeric" placeholder="DD / MM / YYYY"></div>
+    <div id="dayDateWrap" class="hidden"><label>Day Surgery Date</label><input id="dayDate" type="text" inputmode="numeric" placeholder="DD / MM / YYYY"></div>
+    <div id="dayStartWrap" class="hidden"><label>Start Time</label><input id="dayStart" type="time"></div>
+    <div id="dayEndWrap" class="hidden"><label>End Time</label><input id="dayEnd" type="time"></div>
+  </div><div class="actions"><button class="primary" onclick="addAvailability()">Add</button></div></div>
+  <div class="card"><div id="availabilityList"></div></div>
+</section>
+
+<section id="oruse" class="page">
+  <div class="card"><div class="grid g2"><div><label>Surgeon</label><input id="orUseSurgeon" value="Dr. Surgeon"></div><div><label>Week Starting Sunday</label><input id="orUseWeek" type="text" inputmode="numeric" placeholder="DD / MM / YYYY" onchange="renderORUse()"></div></div></div>
+  <div class="card"><div id="orUseRows"></div><div class="actions"><button class="primary" onclick="saveORUse()">Save Week</button></div></div>
+</section>
+
+<section id="stats" class="page"><div class="card"><div class="grid g2"><div><label>Month</label><input id="statsMonth" type="month" onchange="renderStats()"></div><div><label>Surgeon</label><select id="statsSurgeon" onchange="renderStats()"><option value="">All Surgeons</option></select></div></div></div><div id="statsSummary" class="statgrid"></div><div class="card"><div id="statsDetails"></div></div></section>
+
+<section id="trash" class="page"><div class="card"><div class="title"><div><h2>Deleted Cases</h2><div class="muted">Cases removed from the active pathway. Restore or permanently delete.</div></div><span id="trashCount" class="badge b-pending">0</span></div><div class="notice">Deleting from the pathway is different from cancellation. Deleted cases do not appear in work lists, rooms or statistics.</div></div><div id="trashList"></div></section>
+
+<section id="settings" class="page">
+<div class="card">
+  <div class="title"><h2>Procedure Names & Aliases</h2><span class="muted">Administration</span></div>
+  <div class="grid g3">
+    <div><label>Canonical Procedure Name</label><input id="canonicalProcedure" placeholder="Laparoscopic cholecystectomy"></div>
+    <div><label>Alias / Alternative Name</label><input id="procedureAlias" placeholder="lap chole"></div>
+    <div style="display:flex;align-items:end"><button class="primary" onclick="addProcedureAliasV45()">Add Alias</button></div>
+  </div>
+  <div id="procedureAliasList"></div>
+</div>
+<div class="card"><h2>Data</h2><div class="actions"><button class="secondary" onclick="backup()">Backup JSON</button><button class="warn" onclick="restoreInput.click()">Restore</button><input id="restoreInput" type="file" accept=".json" class="hidden" onchange="restore(event)"><button class="danger" onclick="resetAll()">Reset New Database</button></div></div>
+</section>
+</main>
+
+<div id="caseModal" class="modal hidden"><div class="modalBox"><div class="title"><h2 id="modalTitle"></h2><button class="ghost" onclick="closeModal()">Close</button></div><div id="modalBody"></div></div></div>
+
+<script>
+const KEY='operations_database_v2_local';
+const OPERATIONS_API_URL='https://script.google.com/macros/s/AKfycbyT6Mm2gChQ_KiVqF3fqQDKfgqgYYAoZeNt6xEjM4n-QxoBcbwXX7FJn9a6I7nhvaDl/exec';
+const STATUS={
+  patient_preparation:'Patient Preparation',
+  awaiting_anesthesia:'Awaiting Anesthesia',
+  anesthesia_deferred:'Anesthesia Deferred',
+  surgeon_final_documents:'Surgeon Final Documents',
+  coordinator_final_check:'Coordinator Final OR Check',
+  ready_scheduling:'Ready for Scheduling',
+  scheduled:'Scheduled',
+  bed_pending:'Bed Pending',
+  bed_arranged:'Bed Arranged',
+  admitted:'Admitted',
+  or_ready:'OR Ready',
+  in_or:'In OR',
+  completed:'Completed',
+  cancelled:'Cancelled'
+};
+const PATH={elective:'Elective',day:'Day Surgery',inpatient:'Inpatient / Before Discharge',emergency:'Emergency'};
+const PREP_KEYS=['ecg','cxr','cbc','bio','virology','cardiology','other'];
+const PREP_LABELS={ecg:'ECG',cxr:'Chest X-ray',cbc:'CBC',bio:'BIO',virology:'Virology',cardiology:'Cardiology Review – Cardiac Pre-op Clinic',other:'Other Department'};
+let db=(()=>{try{let x=JSON.parse(localStorage.getItem(KEY));if(x&&Array.isArray(x.cases))return x}catch(e){}return{cases:[],rooms:[{id:'R1',name:'OR 1',type:'regular',slots:3},{id:'DAY',name:'Day Surgery',type:'day',slots:3}],assignments:[],availability:[],orUse:[],settings:{}}})();
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const uid=()=> 'REQ-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,5).toUpperCase();
+const now=()=>new Date().toISOString();
+function localISO(d=new Date()){let y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`}
+function fmtDate(v){if(!v)return'—';let m=String(v).slice(0,10).match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${m[3]} / ${m[2]} / ${m[1]}`:v}
+function englishOnly(v){return !/[\u0600-\u06FF]/.test(String(v||''))}
+function save(render=true){localStorage.setItem(KEY,JSON.stringify(db));if(render)renderAll()}
+function audit(c,action,note=''){c.audit=c.audit||[];c.audit.push({time:now(),role:roleSelect.value,action,note});c.updatedAt=now()}
+function closed(c){return ['completed','cancelled'].includes(c.status)}
+function pathBadge(c){let cls=c.pathway==='elective'?'b-elective':c.pathway==='day'?'b-day':c.pathway==='inpatient'?'b-inpatient':'b-emergency';return `<span class="badge ${cls}">${PATH[c.pathway]}</span><span class="badge ${c.status==='completed'?'b-closed':c.status==='ready_scheduling'?'b-ready':'b-pending'}">${STATUS[c.status]||c.status}</span>`}
+function card(c){return `<div class="case"><h3>${esc(c.patientName)} — ${esc(c.plannedProcedure)}</h3><div class="meta">MRN: ${esc(c.mrn)} · ${esc(c.surgeon)} · ${esc(c.id)}</div><div>${pathBadge(c)}</div>${c.schedule?.date?`<div class="meta">📅 ${fmtDate(c.schedule.date)} ${esc(c.schedule.time||'')} · ${esc(c.schedule.orRoom||'')}</div>`:''}<div class="actions"><button class="secondary" onclick="openCase('${c.id}')">Open Case</button></div></div>`}
+
+function prepRowsNew(){
+  prepRequestRows.innerHTML=PREP_KEYS.map((k,i)=>`<div class="reqrow"><label><input id="req_${k}" type="checkbox" style="width:auto"> ${PREP_LABELS[k]}</label><div><label>Order</label><input id="ord_${k}" type="number" min="1" value="${i+1}"></div></div>`).join('');
+}
+function updateRequestFields(){
+  let p=pathway.value;
+  emergencyWrap.classList.toggle('hidden',p!=='emergency');
+  anesChoiceWrap.classList.toggle('hidden',p==='emergency'||p==='inpatient');
+  prepRequestCard.classList.toggle('hidden',p==='emergency');
+}
+function createRequest(){
+  let required=[mrn.value,patientName.value,diagnosis.value,plannedProcedure.value,surgeonName.value];
+  if(required.some(x=>!String(x).trim()))return alert('Enter MRN, patient name, diagnosis, procedure and surgeon.');
+  if(![patientName.value,diagnosis.value,plannedProcedure.value,surgeonName.value].every(englishOnly))return alert('English only.');
+  let p=pathway.value;
+  let send=p==='inpatient'?true:(p==='emergency'?false:sendAnesthesia.value==='yes');
+  let prep={};
+  PREP_KEYS.forEach(k=>prep[k]={required:!!$('req_'+k)?.checked,completed:false,order:+$('ord_'+k)?.value||99});
+  if(prep.other.required)prep.other.department=otherDepartment.value.trim();
+  let custom=[];
+  if(additionalRequirement.value.trim())custom.push({id:uid(),name:additionalRequirement.value.trim(),completed:false,order:100});
+  let c={
+    id:uid(),mrn:mrn.value.trim(),patientName:patientName.value.trim(),age:patientAge.value.trim(),mobile:patientMobile.value.trim(),
+    diagnosis:diagnosis.value.trim(),plannedProcedure:plannedProcedure.value.trim(),surgeon:surgeonName.value.trim(),
+    pathway:p,sendAnesthesia:send,emergencyOptimization:p==='emergency'?emergencyOptimization.value:'',
+    minorProcedure:minorProcedure.value==='yes',minorPoints:minorProcedure.value==='yes'?(+minorPoints.value||0):0,
+    expectedDuration:+expectedDuration.value||60,prep,custom,
+    requirements:{consent1:false,consent2:false,consent3:false,orRequest:false,admissionOrder:false},
+    anesthesia:{status:'',doctor:'',type:'',notes:'',time:''},
+    status:p==='emergency'?'or_ready':'patient_preparation',
+    schedule:{date:'',time:'',orRoom:'',duration:+expectedDuration.value||60},
+    admission:{status:'',bed:'',note:''},operation:{actualProcedure:'',actualSurgeon:'',points:0,basePoints:0,minorPoints:0,end:''},
+    communication:{statusMessage:'',requirementsMessage:'',surgeryMessage:'',arrivalDate:'',arrivalTime:'',arrivalPlace:''},
+    createdAt:now(),updatedAt:now(),audit:[]
+  };
+  audit(c,'Request Created',p==='emergency'?'Emergency → OR Ready':'Sent to Coordinator for Patient Preparation');
+  db.cases.unshift(c);save();
+  [mrn,patientName,patientAge,patientMobile,diagnosis,plannedProcedure,otherDepartment,additionalRequirement].forEach(x=>x.value='');
+  PREP_KEYS.forEach(k=>$('req_'+k).checked=false);
+  alert('Request created.');showPage('cases');
+}
+
+function prepMissing(c){
+  let a=[];PREP_KEYS.forEach(k=>{let x=c.prep?.[k];if(x?.required&&!x.completed)a.push(k==='other'&&x.department?`Other Department – ${x.department}`:PREP_LABELS[k])});
+  (c.custom||[]).forEach(x=>{if(!x.completed)a.push(x.name)});return a;
+}
+function togglePrep(id,key,isCustom=false){
+  if(roleSelect.value!=='coordinator')return;
+  let c=db.cases.find(x=>x.id===id);if(!c)return;
+  if(isCustom){let x=c.custom.find(z=>z.id===key);if(x)x.completed=!x.completed}
+  else c.prep[key].completed=!c.prep[key].completed;
+  audit(c,'Patient Preparation Updated',key);save(false);openCase(id);renderHome();
+}
+function sendToAnesthesia(id){
+  let c=db.cases.find(x=>x.id===id);if(!c)return;let miss=prepMissing(c);if(miss.length)return alert('Complete first: '+miss.join(', '));
+  if(c.sendAnesthesia){c.status='awaiting_anesthesia';audit(c,'Patient Preparation Completed','Sent to Anesthesia')}
+  else{c.status='surgeon_final_documents';audit(c,'Patient Preparation Completed','No anesthesia required → sent to Surgeon Final Documents')}
+  save(false);openCase(id);renderHome();
+}
+
+function coordinatorPrepUI(c){
+  let items=[];PREP_KEYS.forEach(k=>{let x=c.prep?.[k];if(x?.required)items.push({order:x.order||99,html:`<div class="case"><b>${esc(k==='other'&&x.department?`Other Department – ${x.department}`:PREP_LABELS[k])}</b><span class="badge ${x.completed?'b-ready':'b-pending'}">${x.completed?'Completed':'Pending'}</span><div class="actions"><button class="${x.completed?'warn':'ok'}" onclick="togglePrep('${c.id}','${k}')">${x.completed?'Mark Pending':'Mark Completed'}</button></div></div>`})});
+  (c.custom||[]).forEach(x=>items.push({order:x.order||99,html:`<div class="case"><b>${esc(x.name)}</b><span class="badge ${x.completed?'b-ready':'b-pending'}">${x.completed?'Completed':'Pending'}</span><div class="actions"><button class="${x.completed?'warn':'ok'}" onclick="togglePrep('${c.id}','${x.id}',true)">${x.completed?'Mark Pending':'Mark Completed'}</button></div></div>`}));
+  items.sort((a,b)=>a.order-b.order);let miss=prepMissing(c);
+  return `<div class="card"><div class="title"><h3>Patient Preparation</h3><span class="badge ${miss.length?'b-pending':'b-ready'}">${miss.length?miss.length+' Pending':'Complete'}</span></div>${items.map((x,i)=>x.html.replace('<b>','<b>'+(i+1)+'. ')).join('')||'<div class="muted">No preparation requirements.</div>'}<div class="actions"><button class="primary" onclick="sendToAnesthesia('${c.id}')" ${miss.length?'disabled style="opacity:.45"':''}>${c.sendAnesthesia?'Send to Anesthesia':'Complete Preparation'}</button></div></div>`;
+}
+
+function anesthesiaUI(c){
+  if(c.status!=='awaiting_anesthesia'&&c.status!=='anesthesia_deferred')return `<div class="card muted">No anesthesia action at this stage.</div>`;
+  return `<div class="card"><h3>Anesthesia Assessment</h3><label>Anesthesiologist</label><input id="anesDoctor" value="${esc(c.anesthesia.doctor||'')}"><label>Anesthesia Type</label><select id="anesType"><option value="">Select...</option><option ${c.anesthesia.type==='General'?'selected':''}>General</option><option ${c.anesthesia.type==='Spinal'?'selected':''}>Spinal</option><option ${c.anesthesia.type==='Local'?'selected':''}>Local</option><option ${c.anesthesia.type==='Sedation'?'selected':''}>Sedation</option></select><label>Notes / Additional Requirements</label><textarea id="anesNotes">${esc(c.anesthesia.notes||'')}</textarea><div class="actions"><button class="ok" onclick="setAnes('${c.id}','cleared')">Anesthesia Cleared</button><button class="warn" onclick="setAnes('${c.id}','additional')">Additional Requirements</button><button class="danger" onclick="setAnes('${c.id}','deferred')">Deferred</button></div></div>`;
+}
+function setAnes(id,result){
+  let c=db.cases.find(x=>x.id===id);if(!c)return;c.anesthesia.doctor=anesDoctor.value.trim();c.anesthesia.type=anesType.value;c.anesthesia.notes=anesNotes.value.trim();c.anesthesia.time=now();
+  if(result==='cleared'){c.anesthesia.status='cleared';c.status='surgeon_final_documents';audit(c,'Anesthesia Cleared','Returned to Surgeon for Final Surgical Documents')}
+  if(result==='additional'){c.anesthesia.status='additional';c.status='patient_preparation';if(c.anesthesia.notes)c.custom.push({id:uid(),name:c.anesthesia.notes,completed:false,order:999});audit(c,'Anesthesia Additional Requirements','Returned to Coordinator')}
+  if(result==='deferred'){c.anesthesia.status='deferred';c.status='anesthesia_deferred';audit(c,'Anesthesia Deferred',c.anesthesia.notes)}
+  save(false);openCase(id);renderHome();
+}
+
+function finalDocsMissing(c){
+  let r=c.requirements,a=[];if(!r.consent1)a.push('Consent 1');if(!r.consent2)a.push('Consent 2');if(!r.consent3)a.push('Consent 3');if(!r.orRequest)a.push('OR Request / Booking');if(c.pathway==='elective'&&!r.admissionOrder)a.push('Admission Order');return a
+}
+function finalDocsUI(c){
+  let r=c.requirements,needAdm=c.pathway==='elective';
+  return `<div class="card"><div class="title"><h3>Final Surgical Documents</h3><span class="badge ${finalDocsMissing(c).length?'b-pending':'b-ready'}">${finalDocsMissing(c).length?finalDocsMissing(c).length+' Pending':'Complete'}</span></div><div class="notice">These items appear only now, after anesthesia clearance.</div><div class="docgrid">
+    <div class="docbox ${r.consent1?'checked':''}"><label><input id="fd1" type="checkbox" ${r.consent1?'checked':''}>📄 Consent 1</label></div>
+    <div class="docbox ${r.consent2?'checked':''}"><label><input id="fd2" type="checkbox" ${r.consent2?'checked':''}>📄 Consent 2</label></div>
+    <div class="docbox ${r.consent3?'checked':''}"><label><input id="fd3" type="checkbox" ${r.consent3?'checked':''}>📄 Consent 3</label></div>
+    <div class="docbox ${r.orRequest?'checked':''}"><label><input id="fdOR" type="checkbox" ${r.orRequest?'checked':''}>🗓️ OR Request / Booking</label></div>
+    ${needAdm?`<div class="docbox ${r.admissionOrder?'checked':''}"><label><input id="fdAdm" type="checkbox" ${r.admissionOrder?'checked':''}>🏥 Admission Order</label></div>`:''}
+  </div><div class="actions"><button class="secondary" onclick="saveFinalDocs('${c.id}',false)">Save Draft</button><button class="primary" onclick="saveFinalDocs('${c.id}',true)">Complete & Send to Coordinator</button></div></div>`;
+}
+function saveFinalDocs(id,submit){
+  let c=db.cases.find(x=>x.id===id);if(!c)return;c.requirements.consent1=fd1.checked;c.requirements.consent2=fd2.checked;c.requirements.consent3=fd3.checked;c.requirements.orRequest=fdOR.checked;if(c.pathway==='elective')c.requirements.admissionOrder=fdAdm.checked;
+  let miss=finalDocsMissing(c);audit(c,'Final Surgical Documents Updated',miss.length?'Missing: '+miss.join(', '):'All complete');
+  if(submit){if(miss.length)return alert('Complete first: '+miss.join(', '));c.status='coordinator_final_check';audit(c,'Final Surgical Documents Completed','Sent to Coordinator Final OR Check')}
+  save(false);openCase(id);renderHome();
+}
+
+function coordinatorFinalUI(c){
+  let miss=finalDocsMissing(c);
+  return `<div class="card"><div class="title"><h3>Final OR Check</h3><span class="badge ${miss.length?'b-pending':'b-ready'}">${miss.length?'Documents Missing':'Ready'}</span></div>${miss.length?`<div class="notice">Missing: ${esc(miss.join(', '))}</div>`:`<div class="notice">Surgeon final documents complete. Patient preparation and anesthesia pathway complete.</div><div class="actions"><button class="primary" onclick="markReadyScheduling('${c.id}')">Ready for Scheduling</button></div>`}</div>`;
+}
+function markReadyScheduling(id){let c=db.cases.find(x=>x.id===id);if(!c)return;c.status='ready_scheduling';audit(c,'Coordinator Final OR Check Completed','Ready for Scheduling');save(false);openCase(id);renderAll()}
+
+function schedulingUI(c){
+  return `<div class="card"><div class="grid g4"><div><label>Date</label><input id="schDate" type="date" value="${c.schedule.date||localISO()}"></div><div><label>Time</label><input id="schTime" type="time" value="${c.schedule.time||'08:00'}"></div><div><label>OR Room</label><input id="schRoom" value="${esc(c.schedule.orRoom||'OR 1')}"></div><div><label>Duration</label><input id="schDur" type="number" value="${c.schedule.duration||c.expectedDuration}"></div></div><div class="actions"><button class="primary" onclick="scheduleCase('${c.id}')">Schedule</button></div></div>`;
+}
+function scheduleCase(id){let c=db.cases.find(x=>x.id===id);if(!c)return;c.schedule.date=schDate.value;c.schedule.time=schTime.value;c.schedule.orRoom=schRoom.value.trim();c.schedule.duration=+schDur.value||c.expectedDuration;c.status=c.pathway==='elective'?'bed_pending':'scheduled';audit(c,'Surgery Scheduled',`${fmtDate(c.schedule.date)} ${c.schedule.time} · ${c.schedule.orRoom}`);save(false);closeModal();renderAll()}
+
+function admissionUI(c){
+  if(c.pathway!=='elective')return `<div class="card muted">Admission Office is not required for this pathway.</div>`;
+  return `<div class="card"><h3>Admission / Bed Office</h3><label>Reserved Bed</label><input id="bedNo" value="${esc(c.admission.bed||'')}"><label>Note</label><input id="bedNote" value="${esc(c.admission.note||'')}"><div class="actions"><button class="secondary" onclick="saveBed('${c.id}','bed_arranged')">Bed Arranged</button><button class="ok" onclick="saveBed('${c.id}','admitted')">Admitted</button></div></div>`;
+}
+function saveBed(id,status){let c=db.cases.find(x=>x.id===id);c.admission.bed=bedNo.value.trim();c.admission.note=bedNote.value.trim();c.admission.status=status;c.status=status;audit(c,'Admission Updated',status+' · '+c.admission.bed);save(false);openCase(id);renderAll()}
+
+function orUI(c){
+  if(!['scheduled','bed_arranged','admitted','or_ready','in_or'].includes(c.status)&&c.pathway!=='emergency'&&c.pathway!=='inpatient')return `<div class="card muted">Case is not ready for OR action.</div>`;
+  return `<div class="card"><h3>Operating Room</h3><div class="grid g2"><div><label>Actual Procedure</label><input id="actualProcedure" value="${esc(c.operation.actualProcedure||c.plannedProcedure)}"></div><div><label>Actual Surgeon</label><input id="actualSurgeon" value="${esc(c.operation.actualSurgeon||c.surgeon)}"></div></div><div class="actions"><button class="secondary" onclick="setOR('${c.id}','or_ready')">Patient Ready</button><button class="primary" onclick="setOR('${c.id}','in_or')">In OR</button><button class="ok" onclick="completeCase('${c.id}')">Completed</button></div></div>`;
+}
+function setOR(id,s){let c=db.cases.find(x=>x.id===id);c.status=s;audit(c,'OR Status',STATUS[s]);save(false);openCase(id);renderAll()}
+function basePoints(c){return c.pathway==='emergency'?(c.emergencyOptimization==='non_optimized'?4:3):2}
+function completeCase(id){let c=db.cases.find(x=>x.id===id);c.operation.actualProcedure=actualProcedure.value.trim();c.operation.actualSurgeon=actualSurgeon.value.trim();c.operation.basePoints=basePoints(c);c.operation.minorPoints=c.minorProcedure?+c.minorPoints||0:0;c.operation.points=c.operation.basePoints+c.operation.minorPoints;c.operation.end=now();c.status='completed';audit(c,'Operation Completed',`${c.operation.points} points`);save(false);closeModal();renderAll()}
+
+// Patient and staff messages are handled by the separate Surgical Communication Hub.
+
+function surgeonUI(c){
+  if(c.status==='surgeon_final_documents')return finalDocsUI(c);
+  if(closed(c))return'';
+  return `<div class="card"><h3>Surgeon Actions</h3><div class="actions"><button class="danger" onclick="deleteEarly('${c.id}')">Delete Case</button></div></div>`;
+}
+function deleteEarly(id){let c=db.cases.find(x=>x.id===id);if(!['patient_preparation','surgeon_final_documents'].includes(c.status))return alert('Case can only be deleted before progression or when returned to surgeon.');if(!confirm('Delete this case permanently?'))return;db.cases=db.cases.filter(x=>x.id!==id);db.assignments=db.assignments.filter(a=>a.caseId!==id);save(false);closeModal();renderAll()}
+
+function openCase(id){
+  let c=db.cases.find(x=>x.id===id);if(!c)return;modalTitle.textContent=c.patientName+' — '+c.id;
+  let h=`<div class="card"><div>${pathBadge(c)}</div><div class="grid g2"><div><b>MRN</b><div>${esc(c.mrn)}</div></div><div><b>Age</b><div>${esc(c.age||'—')}</div></div><div><b>Surgeon</b><div>${esc(c.surgeon)}</div></div><div><b>Diagnosis</b><div>${esc(c.diagnosis)}</div></div><div><b>Procedure</b><div>${esc(c.plannedProcedure)}</div></div><div><b>Mobile</b><div>${esc(c.mobile||'—')}</div></div></div></div>`;
+  let r=roleSelect.value;
+  if(r==='surgeon')h+=surgeonUI(c);
+  if(r==='coordinator'){
+    if(c.status==='patient_preparation')h+=coordinatorPrepUI(c);
+    if(c.status==='coordinator_final_check')h+=coordinatorFinalUI(c);
+    if(c.status==='ready_scheduling')h+=schedulingUI(c);
+  }
+  if(r==='anesthesia')h+=anesthesiaUI(c);
+  if(r==='admission')h+=admissionUI(c);
+  if(r==='or')h+=orUI(c);
+  if(r==='admin')h+=`<div class="card muted">Administrative view only.</div>`;
+  h+=`<div class="card"><h3>Timeline / Audit Trail</h3><div class="timeline">${[...(c.audit||[])].reverse().map(a=>`<div class="event"><b>${esc(a.action)}</b><div class="meta">${new Date(a.time).toLocaleString('en-GB')} · ${esc(a.role)}</div>${a.note?`<div>${esc(a.note)}</div>`:''}</div>`).join('')}</div></div>`;
+  modalBody.innerHTML=h;caseModal.classList.remove('hidden');
+}
+function closeModal(){caseModal.classList.add('hidden')}
+
+function renderHome(){
+  let a=db.cases;homeStats.innerHTML=[
+    ['Preparation',a.filter(c=>c.status==='patient_preparation').length],
+    ['Anesthesia',a.filter(c=>['awaiting_anesthesia','anesthesia_deferred'].includes(c.status)).length],
+    ['Surgeon Docs',a.filter(c=>c.status==='surgeon_final_documents').length],
+    ['Completed',a.filter(c=>c.status==='completed').length]
+  ].map(x=>`<div class="stat"><b>${x[1]}</b><span>${x[0]}</span></div>`).join('');
+  let r=roleSelect.value,arr=[];
+  if(r==='surgeon')arr=a.filter(c=>!closed(c));
+  if(r==='coordinator')arr=a.filter(c=>['patient_preparation','coordinator_final_check','ready_scheduling','scheduled','bed_pending'].includes(c.status));
+  if(r==='anesthesia')arr=a.filter(c=>['awaiting_anesthesia','anesthesia_deferred'].includes(c.status));
+  if(r==='admission')arr=a.filter(c=>c.pathway==='elective'&&['bed_pending','bed_arranged'].includes(c.status));
+  if(r==='or')arr=a.filter(c=>['scheduled','bed_arranged','admitted','or_ready','in_or'].includes(c.status)||c.pathway==='emergency'&&!closed(c));
+  if(r==='admin')arr=a;
+  homeList.innerHTML=`<div class="card"><div class="title"><h2>${r==='surgeon'?'Surgeon':r==='coordinator'?'OR Coordinator':r==='anesthesia'?'Anesthesia':r==='admission'?'Admission / Bed Office':r==='or'?'Operating Room':'Administration'} — Work List</h2><span class="muted">${arr.length} cases</span></div>${arr.map(card).join('')||'<div class="muted">No cases.</div>'}</div>`;
+}
+function renderCases(){
+  statusFilter.innerHTML='<option value="">All</option>'+Object.entries(STATUS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+  let q=caseSearch.value.toLowerCase(),p=pathFilter.value,s=statusFilter.value;
+  let a=db.cases.filter(c=>(!q||[c.mrn,c.patientName,c.plannedProcedure,c.surgeon].some(x=>String(x).toLowerCase().includes(q)))&&(!p||c.pathway===p)&&(!s||c.status===s));
+  caseList.innerHTML=a.map(card).join('')||'<div class="card muted">No cases.</div>';
+}
+function renderScheduling(){let a=db.cases.filter(c=>c.status==='ready_scheduling');scheduleList.innerHTML=a.map(card).join('')||'<div class="muted">No cases ready for scheduling.</div>'}
+
+function addDays(d,n){let x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return localISO(x)}
+function weekStart(v){let d=new Date((v||localISO())+'T12:00:00'),day=d.getDay();d.setDate(d.getDate()-day);return localISO(d)}
+function allSurgeons(){return [...new Set(db.cases.map(c=>c.surgeon).filter(Boolean))].sort()}
+function addRoom(){if(roleSelect.value!=='coordinator')return;let name=roomName.value.trim();if(!name)return;db.rooms.push({id:uid(),name,type:roomType.value,slots:+roomSlots.value||0});roomName.value='';save(false);renderWeekly()}
+function assigned(roomId,date){return db.assignments.filter(a=>a.roomId===roomId&&a.date===date)}
+function addToRoom(roomId,date){
+  if(roleSelect.value!=='coordinator')return;let sel=$('add_'+roomId+'_'+date.replaceAll('-',''));let c=db.cases.find(x=>x.id===sel.value);if(!c)return;
+  if(db.assignments.some(a=>a.caseId===c.id))return alert('Patient already assigned.');
+  db.assignments.push({id:uid(),roomId,date,caseId:c.id});c.schedule.date=date;c.schedule.orRoom=db.rooms.find(r=>r.id===roomId)?.name||'';save(false);renderWeekly()
+}
+function removeFromRoom(id){if(roleSelect.value!=='coordinator')return;db.assignments=db.assignments.filter(a=>a.id!==id);save(false);renderWeekly()}
+function deleteRoom(id){if(roleSelect.value!=='coordinator')return;if(db.assignments.some(a=>a.roomId===id))return alert('Remove patients first.');db.rooms=db.rooms.filter(r=>r.id!==id);save(false);renderWeekly()}
+function renderWeekly(){
+  let start=weekStart(weekPicker.value||localISO());weekPicker.value=start;roomManager.classList.toggle('hidden',roleSelect.value!=='coordinator');
+  let surg=weeklySurgeon.value,all=allSurgeons(),cur=weeklySurgeon.value;weeklySurgeon.innerHTML='<option value="">All Surgeons</option>'+all.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');if(all.includes(cur))weeklySurgeon.value=cur;surg=weeklySurgeon.value;
+  let names=['Sunday','Monday','Tuesday','Wednesday','Thursday'],days=names.map((n,i)=>({n,date:addDays(start,i)}));
+  if(surg)days=days.filter(d=>db.assignments.some(a=>a.date===d.date&&db.cases.find(c=>c.id===a.caseId)?.surgeon===surg));
+  weeklyBody.innerHTML=days.map(d=>`<div class="weekDay"><div class="weekDayHead"><h3>${d.n}</h3><span class="badge b-elective">${fmtDate(d.date)}</span></div><div class="roomGrid">${db.rooms.map(r=>{let arr=assigned(r.id,d.date).filter(a=>!surg||db.cases.find(c=>c.id===a.caseId)?.surgeon===surg);if(surg&&!arr.length)return'';let eligible=db.cases.filter(c=>['ready_scheduling','scheduled','bed_pending','bed_arranged','admitted','or_ready'].includes(c.status)&&(!db.assignments.some(a=>a.caseId===c.id))&&(r.type!=='day'||c.pathway==='day'));return `<div class="roomCard"><div class="title"><b>${esc(r.name)}</b>${roleSelect.value==='coordinator'?`<button class="danger" onclick="deleteRoom('${r.id}')">Delete Room</button>`:''}</div>${arr.map(a=>{let c=db.cases.find(x=>x.id===a.caseId);return `<div class="patientRow"><div class="patientData"><div><b>MRN</b><div>${esc(c.mrn)}</div></div><div><b>Patient</b><div>${esc(c.patientName)}</div></div><div><b>Age</b><div>${esc(c.age||'—')}</div></div><div><b>Diagnosis</b><div>${esc(c.diagnosis)}</div></div><div><b>Procedure</b><div>${esc(c.plannedProcedure)}</div></div><div><b>Surgeon</b><div>${esc(c.surgeon)}</div></div><div><b>Anesthesiologist</b><div>${esc(c.anesthesia.doctor||'—')}</div></div><div><b>Anesthesia Type</b><div>${esc(c.anesthesia.type||'—')}</div></div><div><b>Virology</b><div>${c.prep.virology?.completed?'Ready':'Not Ready'}</div></div><div><b>Bed</b><div>${esc(c.admission.bed||'—')}</div></div></div>${roleSelect.value==='coordinator'?`<button class="danger" onclick="removeFromRoom('${a.id}')">Remove Patient</button>`:''}</div>`}).join('')||'<div class="muted">No patients.</div>'}${roleSelect.value==='coordinator'&&!surg?`<div class="actions"><select id="add_${r.id}_${d.date.replaceAll('-','')}"><option value="">Add patient...</option>${eligible.map(c=>`<option value="${c.id}">${esc(c.patientName)} — ${esc(c.surgeon)}</option>`).join('')}</select><button class="primary" onclick="addToRoom('${r.id}','${d.date}')">Add</button></div>`:''}</div>`}).join('')}</div></div>`).join('')||'<div class="card muted">No operations for selected surgeon this week.</div>';
+}
+
+function updateAvailFields(){let leave=availType.value==='leave';leaveFromWrap.classList.toggle('hidden',!leave);leaveToWrap.classList.toggle('hidden',!leave);dayDateWrap.classList.toggle('hidden',leave);dayStartWrap.classList.toggle('hidden',leave);dayEndWrap.classList.toggle('hidden',leave)}
+function addAvailability(){let s=availSurgeon.value.trim();if(!s)return;let x={id:uid(),surgeon:s,type:availType.value};if(x.type==='leave'){x.from=leaveFrom.value;x.to=leaveTo.value;if(!x.from||!x.to)return alert('Select both dates.')}else{x.date=dayDate.value;x.start=dayStart.value;x.end=dayEnd.value;if(!x.date)return alert('Select date.')}db.availability.push(x);save(false);renderAvailability()}
+function renderAvailability(){availabilityList.innerHTML=db.availability.map(x=>`<div class="case"><b>${esc(x.surgeon)} — ${x.type==='leave'?'Leave':'Day Surgery Availability'}</b><div class="meta">${x.type==='leave'?`${fmtDate(x.from)} to ${fmtDate(x.to)}`:`${fmtDate(x.date)} ${x.start||''} ${x.end?'- '+x.end:''}`}</div></div>`).join('')||'<div class="muted">No entries.</div>'}
+
+function renderORUse(){let start=weekStart(orUseWeek.value||localISO());orUseWeek.value=start;let names=['Sunday','Monday','Tuesday','Wednesday','Thursday'];orUseRows.innerHTML=names.map((n,i)=>{let d=addDays(start,i),x=db.orUse.find(z=>z.surgeon===orUseSurgeon.value.trim()&&z.date===d),v=x?.hours??0;return `<div class="case"><b>${n} — ${fmtDate(d)}</b><div class="actions"><label><input type="radio" name="use_${i}" value="0" ${v===0?'checked':''}> 0</label><label><input type="radio" name="use_${i}" value="4" ${v===4?'checked':''}> 4 hours</label><label><input type="radio" name="use_${i}" value="8" ${v===8?'checked':''}> 8 hours</label></div></div>`}).join('')}
+function saveORUse(){let s=orUseSurgeon.value.trim(),start=weekStart(orUseWeek.value||localISO());if(!s)return;for(let i=0;i<5;i++){let d=addDays(start,i),v=+document.querySelector(`input[name="use_${i}"]:checked`).value;db.orUse=db.orUse.filter(x=>!(x.surgeon===s&&x.date===d));db.orUse.push({surgeon:s,date:d,hours:v})}save(false);renderORUse()}
+
+function renderStats(){
+  let m=statsMonth.value||localISO().slice(0,7);statsMonth.value=m;let all=allSurgeons(),cur=statsSurgeon.value;statsSurgeon.innerHTML='<option value="">All Surgeons</option>'+all.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');if(all.includes(cur))statsSurgeon.value=cur;let s=statsSurgeon.value;
+  let a=db.cases.filter(c=>c.status==='completed'&&String(c.operation.end).slice(0,7)===m&&(!s||(c.operation.actualSurgeon||c.surgeon)===s));
+  let eg=a.filter(c=>['elective','day','inpatient'].includes(c.pathway)),er=a.filter(c=>c.pathway==='emergency'),mi=a.filter(c=>c.minorProcedure);
+  let ep=eg.reduce((z,c)=>z+(c.operation.basePoints||0),0),rp=er.reduce((z,c)=>z+(c.operation.basePoints||0),0),mp=mi.reduce((z,c)=>z+(c.operation.minorPoints||0),0),tot=ep+rp+mp;
+  statsSummary.innerHTML=[['Elective Group',eg.length,ep],['Emergency',er.length,rp],['Minor',mi.length,mp],['TOTAL POINTS','',tot]].map((x,i)=>`<div class="stat" ${i===3?'style="background:#17212b"':''}><b ${i===3?'style="color:white"':''}>${i===3?x[2]:x[1]}</b><span ${i===3?'style="color:white"':''}>${x[0]}${i<3?' Cases · '+x[2]+' Points':''}</span></div>`).join('');
+  let hours=db.orUse.filter(x=>x.date.slice(0,7)===m&&(!s||x.surgeon===s)).reduce((z,x)=>z+x.hours,0);
+  statsDetails.innerHTML=`<b>OR Utilization: ${hours} hours</b>`;
+}
+
+function renderAll(){renderHome();renderCases();renderScheduling();renderWeekly();renderAvailability();renderORUse();renderStats();updateRoleUI()}
+function updateRoleUI(){let r=roleSelect.value;document.querySelectorAll('nav button').forEach(b=>{let roles=b.dataset.roles;b.classList.toggle('hidden',roles!=='all'&&!roles.split(',').includes(r))})}
+function showPage(id){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('on',x.id===id));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));window.scrollTo(0,0);renderAll()}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>showPage(b.dataset.page));
+roleSelect.onchange=()=>showPage('home');
+pathway.onchange=updateRequestFields;
+minorProcedure.onchange=()=>minorPointsWrap.classList.toggle('hidden',minorProcedure.value!=='yes');
+
+function backup(){let b=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='Surgical_Pathway_Manager_V4_Backup_'+localISO()+'.json';a.click()}
+function restore(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!Array.isArray(x.cases))throw 0;if(confirm('Replace current V4 data?')){db=x;save()}}catch{alert('Invalid backup file.')}};r.readAsText(f)}
+function resetAll(){if(confirm('Delete all V4 data?')){localStorage.removeItem(KEY);location.reload()}}
+
+prepRowsNew();updateRequestFields();weekPicker.value=weekStart(localISO());orUseWeek.value=weekStart(localISO());statsMonth.value=localISO().slice(0,7);leaveFrom.value=localISO();leaveTo.value=localISO();dayDate.value=localISO();updateAvailFields();renderAll();
+</script>
+
+<style>
+.fixed-date{direction:ltr;text-align:center;letter-spacing:.03em}
+.stats-table{width:100%;border-collapse:collapse}
+.stats-table th,.stats-table td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;font-size:12px}
+.patientRow.completed{background:#eefaf2}
+.patientRow.cancelled{background:#fff1f0}
+</style>
+
+<script>
+// =========================
+// V4.7 — fixed dates, rescheduling, OR-plan auto assignment, richer statistics
+// =========================
+
+function normalizeDateInputV41(v){
+  let s=String(v||'').trim();
+  if(!s) return '';
+  let m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(m) return `${m[1]}-${m[2]}-${m[3]}`;
+  m=s.match(/^(\d{1,2})\s*[\/\-]\s*(\d{1,2})\s*[\/\-]\s*(\d{4})$/);
+  if(m){
+    let d=String(+m[1]).padStart(2,'0'), mo=String(+m[2]).padStart(2,'0');
+    return `${m[3]}-${mo}-${d}`;
+  }
+  return '';
+}
+function prettyDateV41(v){
+  let iso=normalizeDateInputV41(v);
+  if(!iso) return String(v||'');
+  let [y,m,d]=iso.split('-');
+  return `${d} / ${m} / ${y}`;
+}
+fmtDate = prettyDateV41;
+
+function setDateFieldV41(el,iso){
+  if(el) el.value=iso?prettyDateV41(iso):'';
+}
+function getDateFieldV41(el){
+  return normalizeDateInputV41(el?.value||'');
+}
+['weekPicker','leaveFrom','leaveTo','dayDate','orUseWeek'].forEach(id=>{
+  let el=$(id); if(el) el.classList.add('fixed-date');
+});
+
+function findOrCreateRoomV41(roomName,pathway){
+  let name=String(roomName||'').trim() || (pathway==='day'?'Day Surgery':'OR 1');
+  let room=db.rooms.find(r=>r.name.toLowerCase()===name.toLowerCase());
+  if(!room){
+    room={id:uid(),name,type:pathway==='day'?'day':'regular',slots:3};
+    db.rooms.push(room);
+  }
+  return room;
+}
+function syncAssignmentWithScheduleV41(c){
+  if(!c?.schedule?.date) return;
+  let room=findOrCreateRoomV41(c.schedule.orRoom,c.pathway);
+  db.assignments=db.assignments.filter(a=>a.caseId!==c.id);
+  db.assignments.push({id:uid(),roomId:room.id,date:c.schedule.date,caseId:c.id});
+}
+
+function schedulingUI(c){
+  let roomOpts=db.rooms.map(r=>`<option value="${esc(r.name)}" ${c.schedule.orRoom===r.name?'selected':''}>${esc(r.name)}</option>`).join('');
+  return `<div class="card">
+    <div class="grid g4">
+      <div><label>Date (DD / MM / YYYY)</label><input id="schDate" class="fixed-date" inputmode="numeric" value="${c.schedule.date?prettyDateV41(c.schedule.date):prettyDateV41(localISO())}"></div>
+      <div><label>Time</label><input id="schTime" type="time" value="${c.schedule.time||'08:00'}"></div>
+      <div><label>OR Room</label><select id="schRoom">${roomOpts}</select></div>
+      <div><label>Duration</label><input id="schDur" type="number" value="${c.schedule.duration||c.expectedDuration}"></div>
+    </div>
+    <div class="actions"><button class="primary" onclick="scheduleCase('${c.id}')">Schedule</button></div>
+  </div>`;
+}
+scheduleCase=function(id){
+  let c=db.cases.find(x=>x.id===id); if(!c)return;
+  let iso=getDateFieldV41($('schDate'));
+  if(!iso) return alert('Enter date as DD / MM / YYYY.');
+  c.schedule.date=iso;
+  c.schedule.time=schTime.value;
+  c.schedule.orRoom=schRoom.value.trim();
+  c.schedule.duration=+schDur.value||c.expectedDuration;
+  c.status=c.pathway==='elective'?'bed_pending':'scheduled';
+  syncAssignmentWithScheduleV41(c);
+  audit(c,'Surgery Scheduled',`${prettyDateV41(c.schedule.date)} ${c.schedule.time} · ${c.schedule.orRoom}`);
+  save(false);closeModal();renderAll();
+};
+
+// Coordinator can change date/time/room after scheduling.
+function coordinatorRescheduleUIV41(c){
+  if(roleSelect.value!=='coordinator') return '';
+  if(!['scheduled','bed_pending','bed_arranged','admitted','or_ready'].includes(c.status)) return '';
+  let roomOpts=db.rooms.map(r=>`<option value="${esc(r.name)}" ${c.schedule.orRoom===r.name?'selected':''}>${esc(r.name)}</option>`).join('');
+  return `<div class="card">
+    <div class="title"><h3>Change Surgery Date / Time</h3><span class="muted">Coordinator only</span></div>
+    <div class="grid g4">
+      <div><label>Date (DD / MM / YYYY)</label><input id="rsDate" class="fixed-date" inputmode="numeric" value="${prettyDateV41(c.schedule.date)}"></div>
+      <div><label>Time</label><input id="rsTime" type="time" value="${c.schedule.time||'08:00'}"></div>
+      <div><label>OR Room</label><select id="rsRoom">${roomOpts}</select></div>
+      <div><label>Duration</label><input id="rsDur" type="number" value="${c.schedule.duration||c.expectedDuration}"></div>
+    </div>
+    <div class="actions"><button class="warn" onclick="rescheduleCaseV41('${c.id}')">Update Surgery Schedule</button></div>
+  </div>`;
+}
+function rescheduleCaseV41(id){
+  let c=db.cases.find(x=>x.id===id); if(!c)return;
+  let iso=getDateFieldV41($('rsDate'));
+  if(!iso) return alert('Enter date as DD / MM / YYYY.');
+  let old=`${prettyDateV41(c.schedule.date)} ${c.schedule.time||''} · ${c.schedule.orRoom||''}`;
+  c.schedule.date=iso;
+  c.schedule.time=rsTime.value;
+  c.schedule.orRoom=rsRoom.value;
+  c.schedule.duration=+rsDur.value||c.expectedDuration;
+  syncAssignmentWithScheduleV41(c);
+  audit(c,'Surgery Rescheduled',`${old} → ${prettyDateV41(c.schedule.date)} ${c.schedule.time} · ${c.schedule.orRoom}`);
+  save(false);openCase(id);renderAll();
+}
+
+// Extend coordinator case page with rescheduling when applicable.
+const _openCaseV41base=openCase;
+openCase=function(id){
+  let c=db.cases.find(x=>x.id===id); if(!c)return;
+  _openCaseV41base(id);
+  if(roleSelect.value==='coordinator'){
+    let box=modalBody;
+    if(box) box.insertAdjacentHTML('beforeend',coordinatorRescheduleUIV41(c));
+  }
+};
+
+// Date-aware availability
+addAvailability=function(){
+  let s=availSurgeon.value.trim();if(!s)return;
+  let x={id:uid(),surgeon:s,type:availType.value};
+  if(x.type==='leave'){
+    x.from=getDateFieldV41(leaveFrom); x.to=getDateFieldV41(leaveTo);
+    if(!x.from||!x.to)return alert('Enter both leave dates as DD / MM / YYYY.');
+    if(x.to<x.from)return alert('Leave To cannot be before Leave From.');
+  }else{
+    x.date=getDateFieldV41(dayDate);x.start=dayStart.value;x.end=dayEnd.value;
+    if(!x.date)return alert('Enter Day Surgery date as DD / MM / YYYY.');
+  }
+  db.availability.push(x);save(false);renderAvailability();
+};
+renderAvailability=function(){
+  availabilityList.innerHTML=db.availability.map(x=>`<div class="case"><b>${esc(x.surgeon)} — ${x.type==='leave'?'Leave':'Day Surgery Availability'}</b><div class="meta">${x.type==='leave'?`${prettyDateV41(x.from)} to ${prettyDateV41(x.to)}`:`${prettyDateV41(x.date)} ${x.start||''} ${x.end?'- '+x.end:''}`}</div></div>`).join('')||'<div class="muted">No entries.</div>';
+};
+
+// Date-aware weekly OR plan
+renderWeekly=function(){
+  let start=weekStart(getDateFieldV41(weekPicker)||localISO());
+  setDateFieldV41(weekPicker,start);
+  roomManager.classList.toggle('hidden',roleSelect.value!=='coordinator');
+  let all=allSurgeons(),cur=weeklySurgeon.value;
+  weeklySurgeon.innerHTML='<option value="">All Surgeons</option>'+all.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
+  if(all.includes(cur))weeklySurgeon.value=cur;
+  let surg=weeklySurgeon.value;
+  let names=['Sunday','Monday','Tuesday','Wednesday','Thursday'],days=names.map((n,i)=>({n,date:addDays(start,i)}));
+  if(surg)days=days.filter(d=>db.assignments.some(a=>a.date===d.date&&db.cases.find(c=>c.id===a.caseId)?.surgeon===surg));
+  weeklyBody.innerHTML=days.map(d=>`<div class="weekDay"><div class="weekDayHead"><h3>${d.n}</h3><span class="badge b-elective">${prettyDateV41(d.date)}</span></div><div class="roomGrid">${db.rooms.map(r=>{
+    let arr=assigned(r.id,d.date).filter(a=>!surg||db.cases.find(c=>c.id===a.caseId)?.surgeon===surg);
+    if(surg&&!arr.length)return'';
+    let eligible=db.cases.filter(c=>['ready_scheduling','scheduled','bed_pending','bed_arranged','admitted','or_ready'].includes(c.status)&&(!db.assignments.some(a=>a.caseId===c.id))&&(r.type!=='day'||c.pathway==='day'));
+    return `<div class="roomCard">
+      <div class="title"><b>${esc(r.name)}</b>${roleSelect.value==='coordinator'?`<button class="danger" onclick="deleteRoom('${r.id}')">Delete Room</button>`:''}</div>
+      ${arr.map(a=>{
+        let c=db.cases.find(x=>x.id===a.caseId);
+        if(!c)return'';
+        let cls=c.status==='completed'?' completed':c.status==='cancelled'?' cancelled':'';
+        return `<div class="patientRow${cls}">
+          <div class="patientData">
+            <div><b>MRN</b><div>${esc(c.mrn||'—')}</div></div>
+            <div><b>Patient Name</b><div>${esc(c.patientName||'—')}</div></div>
+            <div><b>Diagnosis</b><div>${esc(c.diagnosis||'—')}</div></div>
+            <div><b>Procedure</b><div>${esc(c.plannedProcedure||'—')}</div></div>
+            <div><b>Surgeon</b><div>${esc(c.surgeon||'—')}</div></div>
+            <div><b>Anesthesiologist</b><div>${esc(c.anesthesia?.doctor||'—')}</div></div>
+            <div><b>Anesthesia Type</b><div>${esc(c.anesthesia?.type||'—')}</div></div>
+            <div><b>Virology</b><div><span class="badge ${c.prep?.virology?.completed?'b-ready':'b-pending'}">${c.prep?.virology?.completed?'Ready':'Not Ready'}</span></div></div>
+          </div>
+          ${roleSelect.value==='coordinator'?`<div class="actions"><button class="danger" onclick="removeFromRoom('${a.id}')">Remove Patient</button></div>`:''}
+        </div>`;
+      }).join('')||'<div class="muted">No patients.</div>'}
+      ${roleSelect.value==='coordinator'&&!surg?`<div class="actions"><select id="add_${r.id}_${d.date.replaceAll('-','')}"><option value="">Add patient...</option>${eligible.map(c=>`<option value="${c.id}">${esc(c.patientName)} — ${esc(c.surgeon)}</option>`).join('')}</select><button class="primary" onclick="addToRoom('${r.id}','${d.date}')">Add</button></div>`:''}
+    </div>`;
+  }).join('')}</div></div>`).join('')||'<div class="card muted">No operations for selected surgeon this week.</div>';
+};
+
+// Date-aware OR use
+renderORUse=function(){
+  let start=weekStart(getDateFieldV41(orUseWeek)||localISO());
+  setDateFieldV41(orUseWeek,start);
+  let names=['Sunday','Monday','Tuesday','Wednesday','Thursday'];
+  orUseRows.innerHTML=names.map((n,i)=>{
+    let d=addDays(start,i),x=db.orUse.find(z=>z.surgeon===orUseSurgeon.value.trim()&&z.date===d),v=x?.hours??0;
+    return `<div class="case"><b>${n} — ${prettyDateV41(d)}</b><div class="actions">
+      <label><input type="radio" name="use_${i}" value="0" ${v===0?'checked':''}> 0</label>
+      <label><input type="radio" name="use_${i}" value="4" ${v===4?'checked':''}> 4 hours</label>
+      <label><input type="radio" name="use_${i}" value="8" ${v===8?'checked':''}> 8 hours</label>
+    </div></div>`;
+  }).join('');
+};
+saveORUse=function(){
+  let s=orUseSurgeon.value.trim(),start=weekStart(getDateFieldV41(orUseWeek)||localISO());if(!s)return;
+  for(let i=0;i<5;i++){
+    let d=addDays(start,i),v=+document.querySelector(`input[name="use_${i}"]:checked`).value;
+    db.orUse=db.orUse.filter(x=>!(x.surgeon===s&&x.date===d));db.orUse.push({surgeon:s,date:d,hours:v});
+  }
+  save(false);renderORUse();
+};
+
+// Statistics: counts + points + procedure names/counts for surgeon/admin.
+function completedForStatsV41(){
+  let m=statsMonth.value||localISO().slice(0,7),s=statsSurgeon.value;
+  return db.cases.filter(c=>c.status==='completed'&&String(c.operation.end||'').slice(0,7)===m&&(!s||(c.operation.actualSurgeon||c.surgeon)===s));
+}
+renderStats=function(){
+  let m=statsMonth.value||localISO().slice(0,7);statsMonth.value=m;
+  let all=allSurgeons(),cur=statsSurgeon.value;
+  statsSurgeon.innerHTML='<option value="">All Surgeons</option>'+all.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
+  if(all.includes(cur))statsSurgeon.value=cur;
+  let s=statsSurgeon.value,a=completedForStatsV41();
+  let eg=a.filter(c=>['elective','day','inpatient'].includes(c.pathway));
+  let er=a.filter(c=>c.pathway==='emergency');
+  let mi=a.filter(c=>c.minorProcedure);
+  let ep=eg.reduce((z,c)=>z+(+c.operation.basePoints||0),0);
+  let rp=er.reduce((z,c)=>z+(+c.operation.basePoints||0),0);
+  let mp=mi.reduce((z,c)=>z+(+c.operation.minorPoints||0),0);
+  let total=ep+rp+mp;
+  statsSummary.innerHTML=[
+    ['Elective Group',eg.length,ep],
+    ['Emergency',er.length,rp],
+    ['Minor',mi.length,mp],
+    ['TOTAL',a.length,total]
+  ].map((x,i)=>`<div class="stat" ${i===3?'style="background:#17212b"':''}>
+      <b ${i===3?'style="color:white"':''}>${x[1]}</b>
+      <span ${i===3?'style="color:white"':''}>${x[0]} Cases</span>
+      <div class="meta" ${i===3?'style="color:white"':''}>${x[2]} Points</div>
+    </div>`).join('');
+
+  let proc={};
+  a.forEach(c=>{
+    let name=(c.operation.actualProcedure||c.plannedProcedure||'Unknown').trim();
+    if(!proc[name])proc[name]={count:0,points:0};
+    proc[name].count++;
+    proc[name].points+=(+c.operation.points||0);
+  });
+  let rows=Object.entries(proc).sort((a,b)=>b[1].count-a[1].count);
+  let hours=db.orUse.filter(x=>x.date.slice(0,7)===m&&(!s||x.surgeon===s)).reduce((z,x)=>z+x.hours,0);
+  statsDetails.innerHTML=`
+    <div class="title"><h3>Procedure Summary</h3><span class="muted">OR Utilization: ${hours} hours</span></div>
+    <table class="stats-table">
+      <thead><tr><th>Procedure</th><th>Number of Cases</th><th>Points</th></tr></thead>
+      <tbody>${rows.map(([name,v])=>`<tr><td>${esc(name)}</td><td>${v.count}</td><td>${v.points}</td></tr>`).join('')||'<tr><td colspan="3">No completed cases.</td></tr>'}</tbody>
+    </table>
+    <div class="card" style="box-shadow:none;border:1px solid var(--line);margin-top:12px">
+      <h3>Completed Cases</h3>
+      ${a.map(c=>`<div class="case"><b>${esc(c.patientName)} — ${esc(c.operation.actualProcedure||c.plannedProcedure)}</b><div class="meta">${PATH[c.pathway]} · ${+c.operation.points||0} points · ${prettyDateV41(String(c.operation.end).slice(0,10))}</div></div>`).join('')||'<div class="muted">No completed cases.</div>'}
+    </div>`;
+};
+
+// Home stats for surgeon/admin: counts + points.
+const _renderHomeV41base=renderHome;
+renderHome=function(){
+  _renderHomeV41base();
+  if(['surgeon','admin'].includes(roleSelect.value)){
+    let s=roleSelect.value==='surgeon'?surgeonName?.value||'':'';
+    // Do not overwrite worklist; append performance block.
+    let completed=db.cases.filter(c=>c.status==='completed'&&(!s||(c.operation.actualSurgeon||c.surgeon)===s));
+    let eg=completed.filter(c=>['elective','day','inpatient'].includes(c.pathway));
+    let er=completed.filter(c=>c.pathway==='emergency');
+    let mi=completed.filter(c=>c.minorProcedure);
+    let ep=eg.reduce((z,c)=>z+(+c.operation.basePoints||0),0),rp=er.reduce((z,c)=>z+(+c.operation.basePoints||0),0),mp=mi.reduce((z,c)=>z+(+c.operation.minorPoints||0),0);
+    homeList.insertAdjacentHTML('beforeend',`<div class="card"><div class="title"><h2>Case Counts & Points</h2></div><div class="statgrid">
+      <div class="stat"><b>${eg.length}</b><span>Elective Group Cases</span><div class="meta">${ep} Points</div></div>
+      <div class="stat"><b>${er.length}</b><span>Emergency Cases</span><div class="meta">${rp} Points</div></div>
+      <div class="stat"><b>${mi.length}</b><span>Minor Cases</span><div class="meta">${mp} Points</div></div>
+      <div class="stat"><b>${completed.length}</b><span>Total Completed</span><div class="meta">${ep+rp+mp} Points</div></div>
+    </div></div>`);
+  }
+};
+
+// initialize fixed-format date fields
+setDateFieldV41(weekPicker,weekStart(localISO()));
+setDateFieldV41(orUseWeek,weekStart(localISO()));
+setDateFieldV41(leaveFrom,localISO());
+setDateFieldV41(leaveTo,localISO());
+setDateFieldV41(dayDate,localISO());
+
+try{renderAll();}catch(e){}
+</script>
+
+
+<style>
+.datePickerBtn{
+  width:100%; background:#fff; color:var(--ink); border:1px solid var(--line);
+  border-radius:11px; padding:10px; text-align:left; font-weight:600;
+}
+.nativeDateHidden{
+  position:absolute!important; opacity:0!important; pointer-events:none!important;
+  width:1px!important;height:1px!important;
+}
+</style>
+<script>
+// V4.7 — tap-to-select calendar dates; no manual typing.
+function attachCalendarV42(el){
+  if(!el || el.dataset.calendarV42==='1') return;
+  el.dataset.calendarV42='1';
+
+  // preserve current value as ISO
+  let iso=normalizeDateInputV41(el.value)||localISO();
+  el.type='date';
+  el.value=iso;
+  el.classList.add('nativeDateHidden');
+
+  let btn=document.createElement('button');
+  btn.type='button';
+  btn.className='datePickerBtn';
+  btn.textContent=prettyDateV41(el.value);
+  btn.onclick=()=>{
+    if(typeof el.showPicker==='function') el.showPicker();
+    else el.click();
+  };
+  el.insertAdjacentElement('afterend',btn);
+
+  el.addEventListener('change',()=>{
+    btn.textContent=prettyDateV41(el.value);
+    el.dispatchEvent(new Event('datepicked',{bubbles:true}));
+  });
+
+  el._calendarButton=btn;
+}
+function installCalendarsV42(root=document){
+  root.querySelectorAll('input.fixed-date, #weekPicker, #leaveFrom, #leaveTo, #dayDate, #orUseWeek').forEach(attachCalendarV42);
+}
+function selectedDateV42(el){
+  return el?.value||'';
+}
+getDateFieldV41=function(el){return selectedDateV42(el)};
+setDateFieldV41=function(el,iso){
+  if(!el)return;
+  el.value=normalizeDateInputV41(iso)||'';
+  if(el._calendarButton)el._calendarButton.textContent=prettyDateV41(el.value);
+};
+
+// Dynamic schedule/reschedule fields also use calendar picker.
+const _schedulingUIV42=schedulingUI;
+schedulingUI=function(c){
+  let h=_schedulingUIV42(c);
+  setTimeout(()=>installCalendarsV42(document),0);
+  return h;
+};
+const _coordReschedV42=coordinatorRescheduleUIV41;
+coordinatorRescheduleUIV41=function(c){
+  let h=_coordReschedV42(c);
+  setTimeout(()=>installCalendarsV42(document),0);
+  return h;
+};
+
+// When a week/date is picked, refresh the relevant page.
+weekPicker.addEventListener('datepicked',renderWeekly);
+orUseWeek.addEventListener('datepicked',renderORUse);
+
+setTimeout(()=>installCalendarsV42(document),0);
+</script>
+
+
+<script>
+// V4.7 — Coordinator enters anesthesiologist, anesthesia type, and Virology readiness.
+
+function coordinatorClinicalDetailsUIV43(c){
+  if(roleSelect.value!=='coordinator') return '';
+  if(!['coordinator_final_check','ready_scheduling','scheduled','bed_pending','bed_arranged','admitted','or_ready'].includes(c.status)) return '';
+
+  return `<div class="card">
+    <div class="title">
+      <h3>Coordinator OR Details</h3>
+      <span class="muted">Required for Weekly OR Plan</span>
+    </div>
+    <div class="grid g3">
+      <div>
+        <label>Anesthesiologist</label>
+        <input id="coordAnesthV43" value="${esc(c.anesthesia?.doctor||'')}">
+      </div>
+      <div>
+        <label>Anesthesia Type</label>
+        <select id="coordAnesTypeV43">
+          <option value="">Select...</option>
+          <option value="General" ${c.anesthesia?.type==='General'?'selected':''}>General</option>
+          <option value="Spinal" ${c.anesthesia?.type==='Spinal'?'selected':''}>Spinal</option>
+          <option value="Local" ${c.anesthesia?.type==='Local'?'selected':''}>Local</option>
+          <option value="Sedation" ${c.anesthesia?.type==='Sedation'?'selected':''}>Sedation</option>
+          <option value="Regional" ${c.anesthesia?.type==='Regional'?'selected':''}>Regional</option>
+        </select>
+      </div>
+      <div>
+        <label>Virology</label>
+        <select id="coordViroV43">
+          <option value="not_ready" ${!c.prep?.virology?.completed?'selected':''}>Not Ready</option>
+          <option value="ready" ${c.prep?.virology?.completed?'selected':''}>Ready</option>
+        </select>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="primary" onclick="saveCoordinatorClinicalV43('${c.id}')">Save OR Details</button>
+    </div>
+  </div>`;
+}
+
+function saveCoordinatorClinicalV43(id){
+  let c=db.cases.find(x=>x.id===id); if(!c)return;
+
+  c.anesthesia=c.anesthesia||{};
+  c.anesthesia.doctor=(document.getElementById('coordAnesthV43')?.value||'').trim();
+  c.anesthesia.type=document.getElementById('coordAnesTypeV43')?.value||'';
+
+  c.prep=c.prep||{};
+  c.prep.virology=c.prep.virology||{required:true,completed:false,order:99};
+  c.prep.virology.required=true;
+  c.prep.virology.completed=document.getElementById('coordViroV43')?.value==='ready';
+
+  audit(c,'Coordinator OR Details Updated',
+        `Anesthesiologist: ${c.anesthesia.doctor||'—'} | Anesthesia: ${c.anesthesia.type||'—'} | Virology: ${c.prep.virology.completed?'Ready':'Not Ready'}`);
+
+  save(false);
+  openCase(id);
+  renderWeekly();
+}
+
+// Add coordinator details card to coordinator cases.
+const _openCaseV43base=openCase;
+openCase=function(id){
+  let c=db.cases.find(x=>x.id===id); if(!c)return;
+  _openCaseV43base(id);
+  if(roleSelect.value==='coordinator'){
+    modalBody.insertAdjacentHTML('beforeend', coordinatorClinicalDetailsUIV43(c));
+  }
+};
+
+// Require these values before final Ready for Scheduling.
+markReadyScheduling=function(id){
+  let c=db.cases.find(x=>x.id===id); if(!c)return;
+
+  let doctor=(document.getElementById('coordAnesthV43')?.value||c.anesthesia?.doctor||'').trim();
+  let type=document.getElementById('coordAnesTypeV43')?.value||c.anesthesia?.type||'';
+  let viro=document.getElementById('coordViroV43')?.value || (c.prep?.virology?.completed?'ready':'not_ready');
+
+  if(!doctor) return alert('Enter the anesthesiologist.');
+  if(!type) return alert('Select the anesthesia type.');
+  if(viro!=='ready') return alert('Virology must be marked Ready before scheduling.');
+
+  c.anesthesia=c.anesthesia||{};
+  c.anesthesia.doctor=doctor;
+  c.anesthesia.type=type;
+  c.prep=c.prep||{};
+  c.prep.virology=c.prep.virology||{required:true,completed:false,order:99};
+  c.prep.virology.required=true;
+  c.prep.virology.completed=true;
+
+  c.status='ready_scheduling';
+  audit(c,'Coordinator Final OR Check Completed','Ready for Scheduling');
+  save(false);openCase(id);renderAll();
+};
+
+try{renderAll();}catch(e){}
+</script>
+
+
+<script>
+// V4.7 — explicit Elective / Emergency / Minor summaries for Surgeon and Administration.
+
+function summaryGroupV44(cases,title){
+  if(!cases.length) return `<div class="card"><div class="title"><h3>${title}</h3><span class="badge b-closed">0 Cases</span></div><div class="muted">No cases.</div></div>`;
+
+  let proc={};
+  cases.forEach(c=>{
+    let n=(c.operation?.actualProcedure||c.plannedProcedure||'Unknown').trim();
+    if(!proc[n]) proc[n]={count:0,points:0};
+    proc[n].count++;
+    proc[n].points+=(+c.operation?.points||0);
+  });
+  let points=cases.reduce((z,c)=>z+(+c.operation?.points||0),0);
+
+  return `<div class="card">
+    <div class="title">
+      <h3>${title}</h3>
+      <div><span class="badge b-ready">${cases.length} Cases</span><span class="badge b-elective">${points} Points</span></div>
+    </div>
+    <table class="stats-table">
+      <thead><tr><th>Procedure</th><th>Cases</th><th>Points</th></tr></thead>
+      <tbody>${Object.entries(proc).sort((a,b)=>b[1].count-a[1].count).map(([n,v])=>`<tr><td>${esc(n)}</td><td>${v.count}</td><td>${v.points}</td></tr>`).join('')}</tbody>
+    </table>
+  </div>`;
+}
+
+function renderCaseSummariesV44(){
+  if(!['surgeon','admin'].includes(roleSelect.value)) return;
+
+  let surgeonFilter='';
+  if(roleSelect.value==='surgeon'){
+    let known=allSurgeons();
+    surgeonFilter=(surgeonName?.value||known[0]||'').trim();
+  }
+
+  let base=db.cases.filter(c=>c.status==='completed' && (!surgeonFilter || (c.operation?.actualSurgeon||c.surgeon)===surgeonFilter));
+
+  let elective=base.filter(c=>['elective','day','inpatient'].includes(c.pathway));
+  let emergency=base.filter(c=>c.pathway==='emergency');
+  let minor=base.filter(c=>c.minorProcedure);
+
+  homeList.insertAdjacentHTML('beforeend',
+    `<div class="card"><div class="title"><h2>Completed Case Summary</h2><span class="muted">${roleSelect.value==='admin'?'All Surgeons':esc(surgeonFilter||'Surgeon')}</span></div></div>`+
+    summaryGroupV44(elective,'Elective Group')+
+    summaryGroupV44(emergency,'Emergency')+
+    summaryGroupV44(minor,'Minor')
+  );
+}
+
+const _renderHomeV44base=renderHome;
+renderHome=function(){
+  _renderHomeV44base();
+  renderCaseSummariesV44();
+};
+
+try{renderHome();}catch(e){}
+</script>
+
+
+<script>
+// V4.7 — canonical procedure names + aliases
+
+if(!db.procedureAliases){
+  db.procedureAliases=[
+    {canonical:'Laparoscopic cholecystectomy',aliases:['lap chole','lapchole','laparoscopic chole','lap cholecystectomy']},
+    {canonical:'Laparoscopic appendectomy',aliases:['lap appendectomy','lap appendix','lap appy']}
+  ];
+  localStorage.setItem(KEY,JSON.stringify(db));
+}
+
+function normalizeProcedureTextV45(s){
+  return String(s||'')
+    .trim()
+    .toLowerCase()
+    .replace(/[._\-\/]+/g,' ')
+    .replace(/\s+/g,' ');
+}
+
+function canonicalProcedureNameV45(name){
+  let n=normalizeProcedureTextV45(name);
+  if(!n) return '';
+  for(let g of (db.procedureAliases||[])){
+    if(normalizeProcedureTextV45(g.canonical)===n) return g.canonical;
+    if((g.aliases||[]).some(a=>normalizeProcedureTextV45(a)===n)) return g.canonical;
+  }
+  return String(name||'').trim();
+}
+
+function addProcedureAliasV45(){
+  let canonical=(canonicalProcedure.value||'').trim();
+  let alias=(procedureAlias.value||'').trim();
+  if(!canonical||!alias)return alert('Enter both canonical procedure and alias.');
+  if(!englishOnly(canonical)||!englishOnly(alias))return alert('English only.');
+
+  let group=(db.procedureAliases||[]).find(g=>normalizeProcedureTextV45(g.canonical)===normalizeProcedureTextV45(canonical));
+  if(!group){
+    group={canonical,aliases:[]};
+    db.procedureAliases.push(group);
+  }
+  if(!group.aliases.some(a=>normalizeProcedureTextV45(a)===normalizeProcedureTextV45(alias))){
+    group.aliases.push(alias);
+  }
+  canonicalProcedure.value=''; procedureAlias.value='';
+  save(false); renderProcedureAliasesV45();
+}
+
+function deleteProcedureAliasV45(canonical,alias){
+  let group=db.procedureAliases.find(g=>g.canonical===canonical); if(!group)return;
+  group.aliases=group.aliases.filter(a=>a!==alias);
+  if(!group.aliases.length) db.procedureAliases=db.procedureAliases.filter(g=>g!==group);
+  save(false);renderProcedureAliasesV45();
+}
+
+function renderProcedureAliasesV45(){
+  if(!document.getElementById('procedureAliasList'))return;
+  procedureAliasList.innerHTML=(db.procedureAliases||[]).map(g=>`
+    <div class="case">
+      <b>${esc(g.canonical)}</b>
+      <div class="meta">Aliases:</div>
+      <div class="actions">
+        ${(g.aliases||[]).map(a=>`<span class="badge b-elective">${esc(a)}</span>${roleSelect.value==='admin'?`<button class="danger" onclick="deleteProcedureAliasV45('${String(g.canonical).replace(/'/g,"\\'")}','${String(a).replace(/'/g,"\\'")}')">×</button>`:''}`).join('')}
+      </div>
+    </div>`).join('')||'<div class="muted">No aliases configured.</div>';
+}
+
+// Save canonical name while preserving what surgeon typed.
+const _createRequestV45base=createRequest;
+createRequest=function(){
+  let typed=plannedProcedure.value.trim();
+  let canonical=canonicalProcedureNameV45(typed);
+  plannedProcedure.value=canonical;
+  let before=db.cases.length;
+  _createRequestV45base();
+  if(db.cases.length>before){
+    let c=db.cases[0];
+    c.procedureEnteredAs=typed;
+    c.plannedProcedure=canonical;
+    audit(c,'Procedure Name Standardized',typed===canonical?canonical:`${typed} → ${canonical}`);
+    save(false);
+  }
+};
+
+// Stats always group aliases under canonical name.
+function procedureNameForStatsV45(c){
+  return canonicalProcedureNameV45(c.operation?.actualProcedure||c.plannedProcedure||'Unknown');
+}
+
+// Replace summary grouping logic.
+summaryGroupV44=function(cases,title){
+  if(!cases.length) return `<div class="card"><div class="title"><h3>${title}</h3><span class="badge b-closed">0 Cases</span></div><div class="muted">No cases.</div></div>`;
+  let proc={};
+  cases.forEach(c=>{
+    let n=procedureNameForStatsV45(c);
+    if(!proc[n])proc[n]={count:0,points:0};
+    proc[n].count++;
+    proc[n].points+=(+c.operation?.points||0);
+  });
+  let points=cases.reduce((z,c)=>z+(+c.operation?.points||0),0);
+  return `<div class="card">
+    <div class="title"><h3>${title}</h3><div><span class="badge b-ready">${cases.length} Cases</span><span class="badge b-elective">${points} Points</span></div></div>
+    <table class="stats-table"><thead><tr><th>Procedure</th><th>Cases</th><th>Points</th></tr></thead>
+    <tbody>${Object.entries(proc).sort((a,b)=>b[1].count-a[1].count).map(([n,v])=>`<tr><td>${esc(n)}</td><td>${v.count}</td><td>${v.points}</td></tr>`).join('')}</tbody></table>
+  </div>`;
+};
+
+// Main statistics table also uses canonical procedure.
+const _renderStatsV45base=renderStats;
+renderStats=function(){
+  let m=statsMonth.value||localISO().slice(0,7);statsMonth.value=m;
+  let all=allSurgeons(),cur=statsSurgeon.value;
+  statsSurgeon.innerHTML='<option value="">All Surgeons</option>'+all.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
+  if(all.includes(cur))statsSurgeon.value=cur;
+  let s=statsSurgeon.value,a=completedForStatsV41();
+  let eg=a.filter(c=>['elective','day','inpatient'].includes(c.pathway));
+  let er=a.filter(c=>c.pathway==='emergency');
+  let mi=a.filter(c=>c.minorProcedure);
+  let ep=eg.reduce((z,c)=>z+(+c.operation.basePoints||0),0);
+  let rp=er.reduce((z,c)=>z+(+c.operation.basePoints||0),0);
+  let mp=mi.reduce((z,c)=>z+(+c.operation.minorPoints||0),0);
+  let total=ep+rp+mp;
+  statsSummary.innerHTML=[
+    ['Elective Group',eg.length,ep],['Emergency',er.length,rp],['Minor',mi.length,mp],['TOTAL',a.length,total]
+  ].map((x,i)=>`<div class="stat" ${i===3?'style="background:#17212b"':''}><b ${i===3?'style="color:white"':''}>${x[1]}</b><span ${i===3?'style="color:white"':''}>${x[0]} Cases</span><div class="meta" ${i===3?'style="color:white"':''}>${x[2]} Points</div></div>`).join('');
+
+  let proc={};
+  a.forEach(c=>{
+    let name=procedureNameForStatsV45(c);
+    if(!proc[name])proc[name]={count:0,points:0};
+    proc[name].count++;
+    proc[name].points+=(+c.operation.points||0);
+  });
+  let rows=Object.entries(proc).sort((a,b)=>b[1].count-a[1].count);
+  let hours=db.orUse.filter(x=>x.date.slice(0,7)===m&&(!s||x.surgeon===s)).reduce((z,x)=>z+x.hours,0);
+  statsDetails.innerHTML=`<div class="title"><h3>Procedure Summary</h3><span class="muted">OR Utilization: ${hours} hours</span></div>
+    <table class="stats-table"><thead><tr><th>Procedure</th><th>Number of Cases</th><th>Points</th></tr></thead>
+    <tbody>${rows.map(([name,v])=>`<tr><td>${esc(name)}</td><td>${v.count}</td><td>${v.points}</td></tr>`).join('')||'<tr><td colspan="3">No completed cases.</td></tr>'}</tbody></table>
+    <div class="card" style="box-shadow:none;border:1px solid var(--line);margin-top:12px"><h3>Completed Cases</h3>
+    ${a.map(c=>`<div class="case"><b>${esc(c.patientName)} — ${esc(procedureNameForStatsV45(c))}</b><div class="meta">${PATH[c.pathway]} · ${+c.operation.points||0} points · ${prettyDateV41(String(c.operation.end).slice(0,10))}</div></div>`).join('')||'<div class="muted">No completed cases.</div>'}</div>`;
+};
+
+const _renderAllV45base=renderAll;
+renderAll=function(){
+  _renderAllV45base();
+  renderProcedureAliasesV45();
+};
+
+try{renderAll();}catch(e){}
+</script>
+
+
+<script>
+// V4.7 — Minor is a primary pathway, not a secondary flag.
+PATH.minor='Minor';
+
+// Add Minor to pathway selectors.
+function addMinorOptionV46(sel){
+  if(!sel || [...sel.options].some(o=>o.value==='minor')) return;
+  let o=document.createElement('option');o.value='minor';o.textContent='Minor';sel.appendChild(o);
+}
+addMinorOptionV46(pathway);
+addMinorOptionV46(pathFilter);
+
+// Minor no longer uses the old secondary "Minor Procedure?" concept.
+let oldMinorSelect=document.getElementById('minorProcedure');
+if(oldMinorSelect){
+  let wrapper=oldMinorSelect.closest('div');
+  if(wrapper)wrapper.classList.add('hidden');
+}
+if(document.getElementById('minorPointsWrap')) minorPointsWrap.classList.add('hidden');
+
+function updateRequestFields(){
+  let p=pathway.value;
+  emergencyWrap.classList.toggle('hidden',p!=='emergency');
+  anesChoiceWrap.classList.toggle('hidden',p==='emergency'||p==='inpatient');
+  prepRequestCard.classList.toggle('hidden',p==='emergency');
+}
+
+// Override request creation so Minor is stored as its own pathway.
+createRequest=function(){
+  let required=[mrn.value,patientName.value,diagnosis.value,plannedProcedure.value,surgeonName.value];
+  if(required.some(x=>!String(x).trim()))return alert('Enter MRN, patient name, diagnosis, procedure and surgeon.');
+  if(![patientName.value,diagnosis.value,plannedProcedure.value,surgeonName.value].every(englishOnly))return alert('English only.');
+
+  let p=pathway.value;
+  let send=p==='inpatient'?true:(p==='emergency'?false:sendAnesthesia.value==='yes');
+  let prep={};
+  PREP_KEYS.forEach(k=>prep[k]={required:!!$('req_'+k)?.checked,completed:false,order:+$('ord_'+k)?.value||99});
+  if(prep.other.required)prep.other.department=otherDepartment.value.trim();
+
+  let custom=[];
+  if(additionalRequirement.value.trim())custom.push({id:uid(),name:additionalRequirement.value.trim(),completed:false,order:100});
+
+  let typed=plannedProcedure.value.trim();
+  let canonical=canonicalProcedureNameV45(typed);
+
+  let c={
+    id:uid(),mrn:mrn.value.trim(),patientName:patientName.value.trim(),age:patientAge.value.trim(),mobile:patientMobile.value.trim(),
+    diagnosis:diagnosis.value.trim(),plannedProcedure:canonical,procedureEnteredAs:typed,surgeon:surgeonName.value.trim(),
+    pathway:p,sendAnesthesia:send,emergencyOptimization:p==='emergency'?emergencyOptimization.value:'',
+    minorProcedure:p==='minor',minorPoints:0,
+    expectedDuration:+expectedDuration.value||60,prep,custom,
+    requirements:{consent1:false,consent2:false,consent3:false,orRequest:false,admissionOrder:false},
+    anesthesia:{status:'',doctor:'',type:'',notes:'',time:''},
+    status:p==='emergency'?'or_ready':'patient_preparation',
+    schedule:{date:'',time:'',orRoom:'',duration:+expectedDuration.value||60},
+    admission:{status:'',bed:'',note:''},
+    operation:{actualProcedure:'',actualSurgeon:'',points:0,basePoints:0,minorPoints:0,end:''},
+    communication:{statusMessage:'',requirementsMessage:'',surgeryMessage:'',arrivalDate:'',arrivalTime:'',arrivalPlace:''},
+    createdAt:now(),updatedAt:now(),audit:[]
+  };
+  audit(c,'Request Created',p==='emergency'?'Emergency → OR Ready':'Sent to Coordinator for Patient Preparation');
+  if(typed!==canonical)audit(c,'Procedure Name Standardized',`${typed} → ${canonical}`);
+
+  db.cases.unshift(c);save();
+  [mrn,patientName,patientAge,patientMobile,diagnosis,plannedProcedure,otherDepartment,additionalRequirement].forEach(x=>x.value='');
+  PREP_KEYS.forEach(k=>$('req_'+k).checked=false);
+  alert('Request created.');showPage('cases');
+};
+
+// All non-emergency pathways = 2 base points, including Minor.
+basePoints=function(c){
+  return c.pathway==='emergency'?(c.emergencyOptimization==='non_optimized'?4:3):2;
+};
+completeCase=function(id){
+  let c=db.cases.find(x=>x.id===id);
+  c.operation.actualProcedure=actualProcedure.value.trim();
+  c.operation.actualSurgeon=actualSurgeon.value.trim();
+  c.operation.basePoints=basePoints(c);
+  c.operation.minorPoints=0;
+  c.operation.points=c.operation.basePoints;
+  c.operation.end=now();
+  c.status='completed';
+  audit(c,'Operation Completed',`${c.operation.points} points`);
+  save(false);closeModal();renderAll();
+};
+
+// Correct summary categories: Elective / Inpatient / Emergency / Day Surgery / Minor.
+function renderCaseSummariesV46(){
+  if(!['surgeon','admin'].includes(roleSelect.value))return;
+  let surgeonFilter='';
+  if(roleSelect.value==='surgeon'){
+    let known=allSurgeons();
+    surgeonFilter=(surgeonName?.value||known[0]||'').trim();
+  }
+  let base=db.cases.filter(c=>c.status==='completed'&&(!surgeonFilter||(c.operation?.actualSurgeon||c.surgeon)===surgeonFilter));
+  let groups=[
+    ['Elective',base.filter(c=>c.pathway==='elective')],
+    ['Inpatient',base.filter(c=>c.pathway==='inpatient')],
+    ['Emergency',base.filter(c=>c.pathway==='emergency')],
+    ['Day Surgery',base.filter(c=>c.pathway==='day')],
+    ['Minor',base.filter(c=>c.pathway==='minor')]
+  ];
+  homeList.insertAdjacentHTML('beforeend',
+    `<div class="card"><div class="title"><h2>Completed Case Summary — By Pathway</h2><span class="muted">${roleSelect.value==='admin'?'All Surgeons':esc(surgeonFilter||'Surgeon')}</span></div></div>`+
+    groups.map(([n,a])=>summaryGroupV44(a,n)).join('')
+  );
+}
+
+// Replace old V4.4 summary call by removing its appended summary after base render,
+// then append the correct five-category summary in a dedicated block.
+const _renderHomeV46base=renderHome;
+renderHome=function(){
+  _renderHomeV46base();
+  // Previous summary may exist because of legacy patch; remove only legacy completed summary blocks.
+  let headers=[...homeList.querySelectorAll('h2')];
+  headers.filter(h=>h.textContent.trim()==='Completed Case Summary').forEach(h=>{
+    let c=h.closest('.card'); if(c){
+      let next=c.nextElementSibling;
+      for(let i=0;i<3 && next;i++){
+        let rm=next; next=next.nextElementSibling; rm.remove();
+      }
+      c.remove();
+    }
+  });
+  renderCaseSummariesV46();
+};
+
+// Main statistics use five primary pathway categories.
+renderStats=function(){
+  let m=statsMonth.value||localISO().slice(0,7);statsMonth.value=m;
+  let all=allSurgeons(),cur=statsSurgeon.value;
+  statsSurgeon.innerHTML='<option value="">All Surgeons</option>'+all.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
+  if(all.includes(cur))statsSurgeon.value=cur;
+  let s=statsSurgeon.value,a=completedForStatsV41();
+
+  let groups=[
+    ['Elective',a.filter(c=>c.pathway==='elective')],
+    ['Inpatient',a.filter(c=>c.pathway==='inpatient')],
+    ['Emergency',a.filter(c=>c.pathway==='emergency')],
+    ['Day Surgery',a.filter(c=>c.pathway==='day')],
+    ['Minor',a.filter(c=>c.pathway==='minor')]
+  ];
+
+  statsSummary.innerHTML=groups.map(([name,arr])=>{
+    let pts=arr.reduce((z,c)=>z+(+c.operation.points||0),0);
+    return `<div class="stat"><b>${arr.length}</b><span>${name} Cases</span><div class="meta">${pts} Points</div></div>`;
+  }).join('')+
+  `<div class="stat" style="background:#17212b"><b style="color:white">${a.length}</b><span style="color:white">Total Cases</span><div class="meta" style="color:white">${a.reduce((z,c)=>z+(+c.operation.points||0),0)} Points</div></div>`;
+
+  let proc={};
+  a.forEach(c=>{
+    let name=procedureNameForStatsV45(c);
+    if(!proc[name])proc[name]={count:0,points:0};
+    proc[name].count++;
+    proc[name].points+=(+c.operation.points||0);
+  });
+  let rows=Object.entries(proc).sort((a,b)=>b[1].count-a[1].count);
+  let hours=db.orUse.filter(x=>x.date.slice(0,7)===m&&(!s||x.surgeon===s)).reduce((z,x)=>z+x.hours,0);
+  statsDetails.innerHTML=`<div class="title"><h3>Procedure Summary</h3><span class="muted">OR Utilization: ${hours} hours</span></div>
+  <table class="stats-table"><thead><tr><th>Procedure</th><th>Number of Cases</th><th>Points</th></tr></thead>
+  <tbody>${rows.map(([name,v])=>`<tr><td>${esc(name)}</td><td>${v.count}</td><td>${v.points}</td></tr>`).join('')||'<tr><td colspan="3">No completed cases.</td></tr>'}</tbody></table>`;
+};
+
+updateRequestFields();
+try{renderAll();}catch(e){}
+</script>
+
+<script>
+(db.cases||[]).forEach(c=>{c.schedule=c.schedule||{};for(const k of ['admissionDate','admissionTime','arrivalPlace'])if(typeof c.schedule[k]==='undefined')c.schedule[k]='';});
+function operationalSummaryV47(){let a=db.cases.filter(c=>!closed(c));return [['Preparation',a.filter(c=>c.status==='patient_preparation').length],['Anesthesia',a.filter(c=>['awaiting_anesthesia','anesthesia_deferred'].includes(c.status)).length],['Surgeon Docs',a.filter(c=>c.status==='surgeon_final_documents').length],['Final OR Check',a.filter(c=>['coordinator_final_check','ready_scheduling'].includes(c.status)).length],['Bed Pending',a.filter(c=>c.status==='bed_pending').length],['OR / Scheduled',a.filter(c=>['scheduled','bed_arranged','admitted','or_ready','in_or'].includes(c.status)).length],['Completed',db.cases.filter(c=>c.status==='completed').length]];}
+const _renderHomeV47Base=renderHome;
+renderHome=function(){let a=db.cases;homeStats.innerHTML=operationalSummaryV47().map(x=>`<div class="stat"><b>${x[1]}</b><span>${x[0]}</span></div>`).join('');let r=roleSelect.value,arr=[];if(r==='surgeon')arr=a.filter(c=>!closed(c));if(r==='coordinator')arr=a.filter(c=>['patient_preparation','coordinator_final_check','ready_scheduling','scheduled','bed_pending','bed_arranged','admitted','or_ready'].includes(c.status));if(r==='anesthesia')arr=a.filter(c=>['awaiting_anesthesia','anesthesia_deferred'].includes(c.status));if(r==='admission')arr=a.filter(c=>c.pathway==='elective'&&['bed_pending','bed_arranged'].includes(c.status));if(r==='or')arr=a.filter(c=>['scheduled','bed_arranged','admitted','or_ready','in_or'].includes(c.status)||(c.pathway==='emergency'&&!closed(c)));if(r==='admin')arr=a;homeList.innerHTML=`<div class="card"><div class="title"><h2>${r==='surgeon'?'Surgeon':r==='coordinator'?'OR Coordinator':r==='anesthesia'?'Anesthesia':r==='admission'?'Admission / Bed Office':r==='or'?'Operating Room':'Administration'} — Work List</h2><span class="muted">${arr.length} cases</span></div>${arr.map(card).join('')||'<div class="muted">No cases.</div>'}</div>`;if(['surgeon','admin'].includes(r)&&typeof renderCaseSummariesV46==='function')renderCaseSummariesV46();};
+function scheduleFieldsV47(c,prefix){let roomOpts=db.rooms.map(r=>`<option value="${esc(r.name)}" ${c.schedule.orRoom===r.name?'selected':''}>${esc(r.name)}</option>`).join('');return `<div class="grid g4"><div><label>Surgery Date</label><input id="${prefix}Date" class="fixed-date" value="${c.schedule.date?prettyDateV41(c.schedule.date):prettyDateV41(localISO())}"></div><div><label>Surgery Time</label><input id="${prefix}Time" type="time" value="${c.schedule.time||'08:00'}"></div><div><label>OR Room</label><select id="${prefix}Room">${roomOpts}</select></div><div><label>Duration</label><input id="${prefix}Dur" type="number" value="${c.schedule.duration||c.expectedDuration}"></div></div><div class="grid g3" style="margin-top:10px"><div><label>Admission / Attendance Date</label><input id="${prefix}AdmissionDate" class="fixed-date" value="${c.schedule.admissionDate?prettyDateV41(c.schedule.admissionDate):''}"></div><div><label>Admission / Attendance Time</label><input id="${prefix}AdmissionTime" type="time" value="${c.schedule.admissionTime||''}"></div><div><label>Arrival Place</label><input id="${prefix}ArrivalPlace" value="${esc(c.schedule.arrivalPlace||'')}" placeholder="e.g. Surgical Ward / Admission Office"></div></div>`;}
+schedulingUI=function(c){return `<div class="card"><div class="title"><h3>Surgery Schedule</h3><span class="muted">Coordinator</span></div>${scheduleFieldsV47(c,'sch')}<div class="actions"><button class="primary" onclick="scheduleCase('${c.id}')">Schedule</button></div></div>`;};
+scheduleCase=function(id){let c=db.cases.find(x=>x.id===id);if(!c)return;let iso=normalizeDateInputV41(schDate.value),adm=normalizeDateInputV41(schAdmissionDate.value);if(!iso)return alert('Select a valid surgery date.');c.schedule.date=iso;c.schedule.time=schTime.value;c.schedule.orRoom=schRoom.value.trim();c.schedule.duration=+schDur.value||c.expectedDuration;c.schedule.admissionDate=adm||'';c.schedule.admissionTime=schAdmissionTime.value||'';c.schedule.arrivalPlace=schArrivalPlace.value.trim();c.status=c.pathway==='elective'?'bed_pending':'scheduled';syncAssignmentWithScheduleV41(c);audit(c,'Surgery Scheduled',`${prettyDateV41(c.schedule.date)} ${c.schedule.time} · ${c.schedule.orRoom}`+(c.schedule.admissionDate?` | Admission: ${prettyDateV41(c.schedule.admissionDate)} ${c.schedule.admissionTime||''}`:'')+(c.schedule.arrivalPlace?` | ${c.schedule.arrivalPlace}`:''));save(false);closeModal();renderAll();};
+coordinatorRescheduleUIV41=function(c){if(roleSelect.value!=='coordinator'||!['scheduled','bed_pending','bed_arranged','admitted','or_ready'].includes(c.status))return'';return `<div class="card"><div class="title"><h3>Change Surgery Date / Time</h3><span class="muted">Coordinator only</span></div>${scheduleFieldsV47(c,'rs')}<div class="actions"><button class="warn" onclick="rescheduleCaseV47('${c.id}')">Update Surgery Schedule</button></div></div>`;};
+function rescheduleCaseV47(id){let c=db.cases.find(x=>x.id===id);if(!c)return;let iso=normalizeDateInputV41(rsDate.value),adm=normalizeDateInputV41(rsAdmissionDate.value);if(!iso)return alert('Select a valid surgery date.');let old=`${prettyDateV41(c.schedule.date)} ${c.schedule.time||''} · ${c.schedule.orRoom||''}`;c.schedule.date=iso;c.schedule.time=rsTime.value;c.schedule.orRoom=rsRoom.value;c.schedule.duration=+rsDur.value||c.expectedDuration;c.schedule.admissionDate=adm||'';c.schedule.admissionTime=rsAdmissionTime.value||'';c.schedule.arrivalPlace=rsArrivalPlace.value.trim();syncAssignmentWithScheduleV41(c);audit(c,'Surgery Rescheduled',`${old} → ${prettyDateV41(c.schedule.date)} ${c.schedule.time} · ${c.schedule.orRoom}`);save(false);openCase(id);renderAll();}
+// V4.9 — coordinator may return a case with a mandatory reason.
+STATUS.surgeon_repreparation='Surgeon Re-preparation Required';
+function resetForSurgeonRepreparationV491(c){
+  c.requirements=c.requirements||{};for(const k of ['consent1','consent2','consent3','orRequest','admissionOrder'])c.requirements[k]=false;
+  c.prep=c.prep||{};Object.values(c.prep).forEach(x=>{if(x&&typeof x==='object'&&x.required)x.completed=false});
+  (c.custom||[]).forEach(x=>x.completed=false);c.anesthesia=c.anesthesia||{};c.anesthesia.status='';
+}
+coordinatorFinalUI=function(c){
+  let miss=finalDocsMissing(c),ready=!miss.length;
+  return `<div class="card"><div class="title"><h3>Final OR Check</h3><span class="badge ${ready?'b-ready':'b-pending'}">${ready?'Ready':'Documents Missing'}</span></div>${ready?'<div class="notice">Surgeon final documents complete. Patient preparation and anesthesia pathway complete.</div>':`<div class="notice">Missing: ${esc(miss.join(', '))}</div>`}<label>Reason for Return</label><textarea id="returnReason_${c.id}" placeholder="Write the exact reason before returning this case"></textarea><div class="actions">${ready?`<button class="primary" onclick="markReadyScheduling('${c.id}')">Ready for Scheduling</button>`:''}<button class="warn" onclick="returnCaseV49('${c.id}','surgeon')">Return to Surgeon</button><button class="orange" onclick="returnCaseV49('${c.id}','preparation')">Return to Patient Preparation</button></div></div>`;
+};
+function returnCaseV49(id,target){
+  let c=db.cases.find(x=>x.id===id);if(!c)return;let reason=($(`returnReason_${id}`)?.value||'').trim();if(!reason)return alert('Write the reason for returning this case.');
+  c.returnRequest={target,reason,time:now(),role:roleSelect.value,resolved:false};
+  if(target==='surgeon'){c.status='surgeon_repreparation';resetForSurgeonRepreparationV491(c)}
+  else{c.status='patient_preparation';c.custom=c.custom||[];c.custom.push({id:uid(),name:'Returned from Final OR Check: '+reason,completed:false,order:999});}
+  audit(c,target==='surgeon'?'Returned to Surgeon':'Returned to Patient Preparation',reason);save(false);openCase(id);renderAll();
+}
+const finalDocsUIV49Base=finalDocsUI;
+finalDocsUI=function(c){let notice=c.returnRequest&&!c.returnRequest.resolved?`<div class="return-reason"><b>Returned by Coordinator</b><div>${esc(c.returnRequest.reason)}</div><div class="meta">${new Date(c.returnRequest.time).toLocaleString('en-GB')}</div></div>`:'';return notice+finalDocsUIV49Base(c)};
+const saveFinalDocsV49Base=saveFinalDocs;
+saveFinalDocs=function(id,submit){saveFinalDocsV49Base(id,submit);let c=db.cases.find(x=>x.id===id);if(submit&&c?.status==='coordinator_final_check'&&c.returnRequest&&!c.returnRequest.resolved){c.returnRequest.resolved=true;audit(c,'Returned Issue Addressed',c.returnRequest.reason);save(false);openCase(id);renderAll()}};
+function surgeonRepreparationUIV491(c){return `<div class="card"><div class="title"><h3>Surgeon Re-preparation Required</h3><span class="badge b-pending">Action Required</span></div><div class="return-reason"><b>Coordinator Return Reason</b><div>${esc(c.returnRequest?.reason||'Case requires new preparation by the surgeon.')}</div>${c.returnRequest?.time?`<div class="meta">${new Date(c.returnRequest.time).toLocaleString('en-GB')}</div>`:''}</div><div class="grid g2"><div><label>Diagnosis</label><input id="reprepDiagnosisV491" value="${esc(c.diagnosis||'')}"></div><div><label>Planned Procedure</label><input id="reprepProcedureV491" value="${esc(c.plannedProcedure||'')}"></div></div><label>New Preparation Plan / Requirements</label><textarea id="reprepPlanV491" placeholder="Write any new tests, consultations or preparation instructions"></textarea><div class="notice">Sending will restart the patient-preparation pathway. Previous final document approvals are cleared because the plan may have changed.</div><div class="actions"><button class="primary" onclick="submitSurgeonRepreparationV491('${c.id}')">Re-prepare & Send to Coordinator</button></div></div>`}
+function submitSurgeonRepreparationV491(id){let c=db.cases.find(x=>x.id===id);if(!c)return;let diagnosis=reprepDiagnosisV491.value.trim(),procedure=reprepProcedureV491.value.trim(),plan=reprepPlanV491.value.trim();if(!diagnosis||!procedure)return alert('Enter the diagnosis and planned procedure.');c.diagnosis=diagnosis;c.plannedProcedure=procedure;if(plan){c.custom=c.custom||[];c.custom.push({id:uid(),name:plan,completed:false,order:999})}if(c.returnRequest)c.returnRequest.resolved=true;c.status='patient_preparation';audit(c,'Surgeon Re-preparation Completed',plan||'Diagnosis and procedure reviewed; sent to patient preparation');save(false);openCase(id);renderAll()}
+const surgeonUIV491Base=surgeonUI;
+surgeonUI=function(c){if(c.status==='surgeon_repreparation')return surgeonRepreparationUIV491(c);return surgeonUIV491Base(c)};
+operationalSummaryV47=function(){let a=db.cases.filter(c=>!closed(c));return [['Preparation',a.filter(c=>c.status==='patient_preparation').length],['Anesthesia',a.filter(c=>['awaiting_anesthesia','anesthesia_deferred'].includes(c.status)).length],['Surgeon Action',a.filter(c=>['surgeon_final_documents','surgeon_repreparation'].includes(c.status)).length],['Final OR Check',a.filter(c=>['coordinator_final_check','ready_scheduling'].includes(c.status)).length],['Bed Pending',a.filter(c=>c.status==='bed_pending').length],['OR / Scheduled',a.filter(c=>['scheduled','bed_arranged','admitted','or_ready','in_or'].includes(c.status)).length],['Completed',db.cases.filter(c=>c.status==='completed').length]]};
+// V4.8 — surgeon-specific coloured case board and printable PDF report.
+const BOARD_GROUPS_V48=[
+  {id:'preparation',label:'Preparation',cls:'stage-preparation',statuses:['patient_preparation']},
+  {id:'anesthesia',label:'Anesthesia',cls:'stage-anesthesia',statuses:['awaiting_anesthesia','anesthesia_deferred']},
+  {id:'surgeon',label:'Surgeon',cls:'stage-surgeon',statuses:['surgeon_final_documents','surgeon_repreparation']},
+  {id:'final',label:'Final Check',cls:'stage-final',statuses:['coordinator_final_check','ready_scheduling']},
+  {id:'operation',label:'Operation',cls:'stage-operation',statuses:['scheduled','bed_pending','bed_arranged','admitted','or_ready','in_or']},
+  {id:'completed',label:'Completed',cls:'stage-completed',statuses:['completed']},
+  {id:'cancelled',label:'Cancelled',cls:'stage-cancelled',statuses:['cancelled']}
+];
+let boardGroupFilterV48='';
+const boardPdfExcludedV49=new Set();
+function boardGroupV48(c){return BOARD_GROUPS_V48.find(g=>g.statuses.includes(c.status))||BOARD_GROUPS_V48[0]}
+function selectBoardGroupV48(id){boardGroupFilterV48=boardGroupFilterV48===id?'':id;renderSurgeonBoardV48()}
+function boardOpenKeyV48(e,id){if(e.key==='Enter'||e.key===' '){e.preventDefault();openCase(id)}}
+function togglePdfCaseV49(event,id){event.stopPropagation();if(boardPdfExcludedV49.has(id))boardPdfExcludedV49.delete(id);else boardPdfExcludedV49.add(id);renderSurgeonBoardV48()}
+function restorePdfCasesV49(){boardPdfExcludedV49.clear();renderSurgeonBoardV48()}
+function renderSurgeonBoardV48(){
+  if(!$('boardSurgeon'))return;
+  let names=allSurgeons(),cur=boardSurgeon.value;
+  boardSurgeon.innerHTML='<option value="">Select Surgeon</option>'+names.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
+  if(names.includes(cur))boardSurgeon.value=cur;else if(names.length===1)boardSurgeon.value=names[0];
+  let surgeon=boardSurgeon.value,q=boardSearch.value.trim().toLowerCase(),path=boardPathway.value;
+  let base=db.cases.filter(c=>surgeon&&c.surgeon===surgeon&&(!path||c.pathway===path)&&(!q||[c.mrn,c.patientName,c.plannedProcedure,c.diagnosis].some(v=>String(v||'').toLowerCase().includes(q))));
+  let pdfCases=base.filter(c=>!boardPdfExcludedV49.has(c.id)),counts=Object.fromEntries(BOARD_GROUPS_V48.map(g=>[g.id,pdfCases.filter(c=>g.statuses.includes(c.status)).length]));
+  boardLegend.innerHTML=BOARD_GROUPS_V48.map(g=>`<span><i style="--dot:var(--${g.cls.replace('stage-','')},#777);background:${getBoardColorV48(g.id)}"></i>${g.label}</span>`).join('');
+  boardSummary.innerHTML=BOARD_GROUPS_V48.map(g=>`<button class="${boardGroupFilterV48===g.id?'active':''}" onclick="selectBoardGroupV48('${g.id}')"><b style="color:${getBoardColorV48(g.id)}">${counts[g.id]}</b><span>${g.label}</span></button>`).join('');
+  let cases=base.filter(c=>!boardGroupFilterV48||boardGroupV48(c).id===boardGroupFilterV48).sort((a,b)=>BOARD_GROUPS_V48.indexOf(boardGroupV48(a))-BOARD_GROUPS_V48.indexOf(boardGroupV48(b))||String(a.patientName).localeCompare(String(b.patientName)));
+  boardPrintHeading.innerHTML=surgeon?`<div style="margin:12px 0"><b>${esc(surgeon)}</b> · ${pdfCases.length} cases in PDF <span class="muted">· Generated ${fmtDate(localISO())}</span></div>`:'<div class="notice" style="margin-top:10px">Select a surgeon to display all assigned patients.</div>';
+  boardPdfTools.innerHTML=surgeon?`<span class="muted">PDF includes ${pdfCases.length} of ${base.length} cases.</span>${boardPdfExcludedV49.size?'<button class="ghost" onclick="restorePdfCasesV49()">Restore Excluded Cases</button>':''}`:'';
+  surgeonCaseGrid.innerHTML=cases.map(c=>{let g=boardGroupV48(c),excluded=boardPdfExcludedV49.has(c.id),date=c.schedule?.date?`${fmtDate(c.schedule.date)} ${esc(c.schedule.time||'')} · ${esc(c.schedule.orRoom||'')}`:'';return `<div class="surgeon-case ${g.cls}${excluded?' pdf-excluded':''}" role="button" tabindex="0" onclick="openCase('${c.id}')" onkeydown="boardOpenKeyV48(event,'${c.id}')"><span class="stage-label">${esc(STATUS[c.status]||g.label)}</span><h3>${esc(c.patientName)}</h3><div class="meta">MRN: ${esc(c.mrn)} · Age: ${esc(c.age||'—')}</div><div class="procedure">${esc(c.plannedProcedure)}</div><div class="meta"><b>Diagnosis:</b> ${esc(c.diagnosis||'—')}</div>${date?`<div class="date">📅 ${date}</div>`:''}<button class="${excluded?'ok':'danger'} pdf-toggle board-controls" onclick="togglePdfCaseV49(event,'${c.id}')">${excluded?'Include in PDF':'Remove from PDF'}</button><div class="open-hint">Open patient details →</div></div>`}).join('')||(surgeon?'<div class="board-empty">No cases match the selected filters.</div>':'');
+}
+function getBoardColorV48(id){return({preparation:'#d89000',anesthesia:'#7254b3',surgeon:'#1877b7',final:'#008d8d',operation:'#d85a18',completed:'#27834b',cancelled:'#b13c37'})[id]||'#667785'}
+function printSurgeonBoardV48(){if(!boardSurgeon.value)return alert('Select a surgeon first.');let old=document.title;document.title=`${boardSurgeon.value} - Surgical Cases - ${localISO()}`;window.print();document.title=old}
+function importPreviousDataV481(event){
+  let file=event.target.files?.[0];if(!file)return;
+  let reader=new FileReader();reader.onload=()=>{try{
+    let old=JSON.parse(reader.result);if(!old||!Array.isArray(old.cases))throw new Error('invalid');
+    if(!confirm(`Import ${old.cases.length} cases from the previous backup? Existing cases will be kept and duplicates will not be added.`))return;
+    let before=db.cases.length,ids=new Set(db.cases.map(c=>c.id)),fingerprints=new Set(db.cases.map(c=>`${String(c.mrn).trim()}|${String(c.plannedProcedure).trim().toLowerCase()}|${String(c.surgeon).trim().toLowerCase()}`));
+    for(const c of old.cases){let fp=`${String(c.mrn).trim()}|${String(c.plannedProcedure).trim().toLowerCase()}|${String(c.surgeon).trim().toLowerCase()}`;if(!ids.has(c.id)&&!fingerprints.has(fp)){db.cases.push(c);ids.add(c.id);fingerprints.add(fp)}}
+    db.rooms=db.rooms||[];for(const r of (old.rooms||[]))if(!db.rooms.some(x=>x.id===r.id))db.rooms.push(r);
+    db.assignments=db.assignments||[];for(const a of (old.assignments||[]))if(!db.assignments.some(x=>x.id===a.id)&&db.cases.some(c=>c.id===a.caseId))db.assignments.push(a);
+    db.availability=db.availability||[];for(const a of (old.availability||[]))if(!db.availability.some(x=>x.id===a.id))db.availability.push(a);
+    db.orUse=db.orUse||[];for(const u of (old.orUse||[]))if(!db.orUse.some(x=>x.surgeon===u.surgeon&&x.date===u.date))db.orUse.push(u);
+    save(false);renderAll();alert(`${db.cases.length-before} previous cases imported successfully.`);
+  }catch(e){alert('This is not a valid Surgical Pathway backup JSON file. Open the previous version and choose Backup JSON first.')}finally{event.target.value=''}};reader.readAsText(file);
+}
+const renderAllV48Base=renderAll;
+renderAll=function(){renderAllV48Base();renderSurgeonBoardV48()};
+let migratedReprepV491=false;(db.cases||[]).forEach(c=>{if(c.status==='surgeon_final_documents'&&c.returnRequest?.target==='surgeon'&&!c.returnRequest.resolved){c.status='surgeon_repreparation';resetForSurgeonRepreparationV491(c);migratedReprepV491=true}});if(migratedReprepV491)save(false);
+
+// V5.0 — messaging moved to the separate Communication Hub, safe deletion, and room-first OR plan.
+const STANDARD_ROOMS_V5=[...Array.from({length:8},(_,i)=>({id:`R${i+1}`,name:`R${i+1}`,type:'regular',slots:3})),...Array.from({length:4},(_,i)=>({id:`DSU${i+1}`,name:`DSU${i+1}`,type:'day',slots:3}))];
+function roomRankV5(r){let m=String(r.name||'').match(/^(DSU|R)(\d+)$/i);if(!m)return 1000;return (m[1].toUpperCase()==='R'?0:100)+Number(m[2])}
+function sortedRoomsV5(){return [...(db.rooms||[])].sort((a,b)=>roomRankV5(a)-roomRankV5(b)||String(a.name).localeCompare(String(b.name),undefined,{numeric:true}))}
+function ensureRoomsV5(){
+  db.rooms=Array.isArray(db.rooms)?db.rooms:[];db.assignments=Array.isArray(db.assignments)?db.assignments:[];db.deletedCases=Array.isArray(db.deletedCases)?db.deletedCases:[];db.roomCapacities=db.roomCapacities&&typeof db.roomCapacities==='object'?db.roomCapacities:{};
+  const mapName={'OR 1':'R1','Day Surgery':'DSU1'};
+  for(const c of db.cases||[]){c.schedule=c.schedule||{};if(mapName[c.schedule.orRoom])c.schedule.orRoom=mapName[c.schedule.orRoom]}
+  let legacyDay=db.rooms.find(r=>r.id==='DAY'||r.name==='Day Surgery');
+  if(legacyDay){for(const a of db.assignments)if(a.roomId===legacyDay.id)a.roomId='DSU1';db.rooms=db.rooms.filter(r=>r!==legacyDay&&r.id!=='DSU1');db.rooms.push({id:'DSU1',name:'DSU1',type:'day',slots:legacyDay.slots||3})}
+  let legacyR1=db.rooms.find(r=>r.id==='R1'||r.name==='OR 1');if(legacyR1){for(const a of db.assignments)if(a.roomId===legacyR1.id)a.roomId='R1';db.rooms=db.rooms.filter(r=>r!==legacyR1&&r.id!=='R1');db.rooms.push({id:'R1',name:'R1',type:'regular',slots:legacyR1.slots||3})}
+  for(const r of STANDARD_ROOMS_V5)if(!db.rooms.some(x=>x.id===r.id||String(x.name).toUpperCase()===r.name))db.rooms.push({...r});
+  db.rooms=sortedRoomsV5();
+}
+ensureRoomsV5();
+
+addRoom=function(){if(roleSelect.value!=='coordinator')return;let name=roomName.value.trim();if(!name)return alert('Enter the room name.');if(db.rooms.some(r=>String(r.name).toLowerCase()===name.toLowerCase()))return alert('This room already exists.');db.rooms.push({id:uid(),name,type:roomType.value,slots:+roomSlots.value||0});roomName.value='';save(false);renderWeekly()};
+deleteRoom=function(id){if(roleSelect.value!=='coordinator')return;if(STANDARD_ROOMS_V5.some(r=>r.id===id))return alert('Standard rooms R1–R8 and DSU1–DSU4 cannot be deleted.');if(db.assignments.some(a=>a.roomId===id))return alert('Remove patients from this room first.');db.rooms=db.rooms.filter(r=>r.id!==id);save(false);renderWeekly()};
+function roomMatchesCaseV5(room,c){return room.type===(c.pathway==='day'?'day':'regular')}
+function safeDomV5(v){return String(v).replace(/[^a-zA-Z0-9]/g,'')}
+function addToRoomV5(roomId){if(roleSelect.value!=='coordinator')return;let key=safeDomV5(roomId),date=$(`roomDateV5_${key}`)?.value,caseId=$(`roomCaseV5_${key}`)?.value,c=db.cases.find(x=>x.id===caseId),room=db.rooms.find(x=>x.id===roomId);if(!date||!c||!room)return alert('Select the date and patient.');if(!roomMatchesCaseV5(room,c))return alert(c.pathway==='day'?'Day Surgery cases must be assigned to a DSU room.':'This case must be assigned to a main R room.');if(db.assignments.some(a=>a.caseId===c.id))return alert('Patient is already assigned to a room.');db.assignments.push({id:uid(),roomId,date,caseId:c.id});c.schedule=c.schedule||{};c.schedule.date=date;c.schedule.orRoom=room.name;if(!c.schedule.time)c.schedule.time='08:00';audit(c,'Assigned to OR Room',`${prettyDateV41(date)} · ${room.name}`);save(false);renderWeekly()}
+function removeFromRoomV5(id){if(roleSelect.value!=='coordinator')return;let a=db.assignments.find(x=>x.id===id),c=a&&db.cases.find(x=>x.id===a.caseId);if(!a)return;if(!confirm('Remove this patient from the room and return the case to Ready for Scheduling?'))return;db.assignments=db.assignments.filter(x=>x.id!==id);if(c){c.schedule=c.schedule||{};c.schedule.date='';c.schedule.time='';c.schedule.orRoom='';c.schedule.admissionDate='';c.schedule.admissionTime='';c.schedule.arrivalPlace='';c.admission={status:'',bed:'',note:''};c.status='ready_scheduling';audit(c,'Removed from OR Schedule','Returned to Ready for Scheduling')}save(false);renderAll()}
+function roomCaseRowV5(a){let c=db.cases.find(x=>x.id===a.caseId);if(!c)return'';return `<div class="room-case"><div class="room-case-grid"><div><div class="room-case-time">${esc(c.schedule?.time||'—')}</div><div class="meta">${prettyDateV41(a.date)}</div></div><div><b>${esc(c.patientName)}</b><div class="meta">MRN ${esc(c.mrn)} · ${esc(c.age||'—')} y</div></div><div><b>Diagnosis</b><div>${esc(c.diagnosis||'—')}</div></div><div><b>Procedure</b><div>${esc(c.plannedProcedure||'—')}</div></div><div><b>${esc(c.surgeon||'—')}</b><div class="meta">${esc(c.anesthesia?.type||'Anesthesia —')} · Bed ${esc(c.admission?.bed||'—')}</div></div></div>${roleSelect.value==='coordinator'?`<div class="actions"><button class="danger" onclick="removeFromRoomV5('${a.id}')">Remove from Room</button></div>`:''}</div>`}
+renderWeekly=function(){
+  ensureRoomsV5();let start=weekStart(getDateFieldV41(weekPicker)||localISO());setDateFieldV41(weekPicker,start);roomManager.classList.toggle('hidden',roleSelect.value!=='coordinator');
+  let names=allSurgeons(),cur=weeklySurgeon.value;weeklySurgeon.innerHTML='<option value="">All Surgeons</option>'+names.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');if(names.includes(cur))weeklySurgeon.value=cur;let surg=weeklySurgeon.value,dates=Array.from({length:5},(_,i)=>addDays(start,i)),dateSet=new Set(dates),rooms=sortedRoomsV5();
+  if(surg)rooms=rooms.filter(r=>db.assignments.some(a=>a.roomId===r.id&&dateSet.has(a.date)&&db.cases.find(c=>c.id===a.caseId)?.surgeon===surg));
+  weeklyBody.innerHTML=rooms.map(r=>{let arr=db.assignments.filter(a=>a.roomId===r.id&&dateSet.has(a.date)).filter(a=>!surg||db.cases.find(c=>c.id===a.caseId)?.surgeon===surg).sort((a,b)=>a.date.localeCompare(b.date)||String(db.cases.find(c=>c.id===a.caseId)?.schedule?.time||'').localeCompare(String(db.cases.find(c=>c.id===b.caseId)?.schedule?.time||'')));let eligible=db.cases.filter(c=>['ready_scheduling','scheduled','bed_pending','bed_arranged','admitted','or_ready'].includes(c.status)&&!db.assignments.some(a=>a.caseId===c.id)&&roomMatchesCaseV5(r,c));let key=safeDomV5(r.id),add=roleSelect.value==='coordinator'&&!surg?`<div class="grid g3"><div><label>Operation Date</label><select id="roomDateV5_${key}">${dates.map(d=>`<option value="${d}">${prettyDateV41(d)}</option>`).join('')}</select></div><div><label>Add Patient</label><select id="roomCaseV5_${key}"><option value="">Select patient...</option>${eligible.map(c=>`<option value="${c.id}">${esc(c.patientName)} — ${esc(c.surgeon)}</option>`).join('')}</select></div><div style="display:flex;align-items:end"><button class="primary" onclick="addToRoomV5('${r.id}')">Add to ${esc(r.name)}</button></div></div>`:'';return `<div class="card room-v5 ${r.type==='day'?'day-room':''}"><div class="title"><div><h2>${esc(r.name)}</h2><div class="muted">${r.type==='day'?'Day Surgery Unit':'Main Operating Room'} · ${arr.length} operations this week</div></div>${roleSelect.value==='coordinator'&&!STANDARD_ROOMS_V5.some(x=>x.id===r.id)?`<button class="danger" onclick="deleteRoom('${r.id}')">Delete Room</button>`:''}</div>${arr.map(roomCaseRowV5).join('')||'<div class="muted">No operations assigned this week.</div>'}${add}</div>`}).join('')||'<div class="card muted">No operations for the selected surgeon this week.</div>';
+};
+
+function availableRoomsForCaseV5(c){return sortedRoomsV5().filter(r=>roomMatchesCaseV5(r,c))}
+scheduleFieldsV47=function(c,prefix){let rooms=availableRoomsForCaseV5(c),selected=rooms.some(r=>r.name===c.schedule.orRoom)?c.schedule.orRoom:(rooms[0]?.name||''),roomOpts=rooms.map(r=>`<option value="${esc(r.name)}" ${selected===r.name?'selected':''}>${esc(r.name)}</option>`).join('');return `<div class="grid g4"><div><label>Surgery Date</label><input id="${prefix}Date" class="fixed-date" value="${c.schedule.date?prettyDateV41(c.schedule.date):prettyDateV41(localISO())}"></div><div><label>Surgery Time</label><input id="${prefix}Time" type="time" value="${c.schedule.time||'08:00'}"></div><div><label>OR Room</label><select id="${prefix}Room">${roomOpts}</select></div><div><label>Duration</label><input id="${prefix}Dur" type="number" value="${c.schedule.duration||c.expectedDuration}"></div></div><div class="grid g3" style="margin-top:10px"><div><label>Admission / Attendance Date</label><input id="${prefix}AdmissionDate" class="fixed-date" value="${c.schedule.admissionDate?prettyDateV41(c.schedule.admissionDate):''}"></div><div><label>Admission / Attendance Time</label><input id="${prefix}AdmissionTime" type="time" value="${c.schedule.admissionTime||''}"></div><div><label>Arrival Place</label><input id="${prefix}ArrivalPlace" value="${esc(c.schedule.arrivalPlace||'')}" placeholder="e.g. Surgical Ward / Admission Office"></div></div>`};
+schedulingUI=function(c){return `<div class="card"><div class="title"><h3>Surgery Schedule</h3><span class="muted">Coordinator</span></div>${scheduleFieldsV47(c,'sch')}<div class="actions"><button class="primary" onclick="scheduleCase('${c.id}')">Schedule</button></div></div>`};
+coordinatorRescheduleUIV41=function(c){if(roleSelect.value!=='coordinator'||!['scheduled','bed_pending','bed_arranged','admitted','or_ready'].includes(c.status))return'';return `<div class="card"><div class="title"><h3>Change Surgery Date / Time</h3><span class="muted">Coordinator only</span></div>${scheduleFieldsV47(c,'rs')}<div class="actions"><button class="warn" onclick="rescheduleCaseV47('${c.id}')">Update Surgery Schedule</button></div></div>`};
+
+function surgeonDeletePanelV5(c){return `<div class="card danger-zone"><div class="title"><div><h3>Remove Case from Pathway</h3><div class="muted">Available to the surgeon at every stage. The case moves to Deleted Cases first.</div></div><button class="danger" onclick="moveCaseToTrashV5('${c.id}')">Delete to Trash</button></div></div>`}
+surgeonUI=function(c){let h='';if(c.status==='surgeon_repreparation')h+=surgeonRepreparationUIV491(c);else if(c.status==='surgeon_final_documents')h+=finalDocsUI(c);h+=surgeonDeletePanelV5(c);return h};
+function moveCaseToTrashV5(id){if(roleSelect.value!=='surgeon')return alert('Only the surgeon can delete cases.');let c=db.cases.find(x=>x.id===id);if(!c)return;let reason=prompt('Reason for deleting this case from the pathway:','');if(reason===null)return;if(!reason.trim())return alert('Enter the deletion reason.');if(!confirm(`Move ${c.patientName} to Deleted Cases?`))return;let assignments=db.assignments.filter(a=>a.caseId===id);audit(c,'Moved to Deleted Cases',reason.trim());db.deletedCases.unshift({id:uid(),case:c,assignments,deletedAt:now(),deletedBy:'surgeon',reason:reason.trim()});db.cases=db.cases.filter(x=>x.id!==id);db.assignments=db.assignments.filter(a=>a.caseId!==id);save(false);closeModal();renderAll()}
+function renderTrashV5(){if(!$('trashList'))return;let a=db.deletedCases||[];trashCount.textContent=`${a.length} Cases`;trashList.innerHTML=a.map(x=>{let c=x.case||{};return `<div class="card trash-case"><div class="title"><div><h3>${esc(c.patientName||'—')} — ${esc(c.plannedProcedure||'—')}</h3><div class="meta">MRN: ${esc(c.mrn||'—')} · ${esc(c.surgeon||'—')} · Previous stage: ${esc(STATUS[c.status]||c.status||'—')}</div></div><span class="badge b-pending">Deleted ${new Date(x.deletedAt).toLocaleDateString('en-GB')}</span></div><div class="notice"><b>Reason:</b> ${esc(x.reason||'—')}</div><div class="actions"><button class="ok" onclick="restoreDeletedCaseV5('${x.id}')">Restore Case</button><button class="danger" onclick="permanentlyDeleteCaseV5('${x.id}')">Delete Permanently</button></div></div>`}).join('')||'<div class="card muted">Deleted Cases is empty.</div>'}
+function restoreDeletedCaseV5(id){if(roleSelect.value!=='surgeon')return;let x=db.deletedCases.find(z=>z.id===id);if(!x)return;if(db.cases.some(c=>c.id===x.case.id))return alert('A case with the same request ID already exists.');if(!confirm(`Restore ${x.case.patientName} to the previous stage?`))return;delete x.case._deleted;audit(x.case,'Restored from Deleted Cases','Restored by surgeon');db.cases.push(x.case);for(const a of x.assignments||[])if(db.rooms.some(r=>r.id===a.roomId)&&!db.assignments.some(z=>z.id===a.id||z.caseId===a.caseId))db.assignments.push(a);db.deletedCases=db.deletedCases.filter(z=>z.id!==id);save(false);renderAll();showPage('cases')}
+function permanentlyDeleteCaseV5(id){if(roleSelect.value!=='surgeon')return;let x=db.deletedCases.find(z=>z.id===id);if(!x)return;if(!confirm(`Permanently delete ${x.case.patientName}? This cannot be undone except from a backup.`))return;if(!confirm('Final confirmation: permanently erase this case and its audit history?'))return;db.deletedCases=db.deletedCases.filter(z=>z.id!==id);save(false);renderTrashV5()}
+
+// V5.1 — complete OR-list data and clickable daily vacancies.
+(db.cases||[]).forEach(c=>{for(const k of ['nationality','sex','unit','specialty','serology','remarks'])if(typeof c[k]==='undefined')c[k]=''});db.roomCapacities=db.roomCapacities&&typeof db.roomCapacities==='object'?db.roomCapacities:{};
+
+createRequest=function(){let required=[mrn.value,patientName.value,diagnosis.value,plannedProcedure.value,surgeonName.value];if(required.some(x=>!String(x).trim()))return alert('Enter MRN, patient name, diagnosis, procedure and surgeon.');if(![patientName.value,diagnosis.value,plannedProcedure.value,surgeonName.value].every(englishOnly))return alert('English only.');let p=pathway.value,send=p==='inpatient'?true:(p==='emergency'?false:sendAnesthesia.value==='yes'),prep={};PREP_KEYS.forEach(k=>prep[k]={required:!!$('req_'+k)?.checked,completed:false,order:+$('ord_'+k)?.value||99});if(prep.other.required)prep.other.department=otherDepartment.value.trim();let custom=[];if(additionalRequirement.value.trim())custom.push({id:uid(),name:additionalRequirement.value.trim(),completed:false,order:100});let typed=plannedProcedure.value.trim(),canonical=canonicalProcedureNameV45(typed),c={id:uid(),mrn:mrn.value.trim(),patientName:patientName.value.trim(),age:patientAge.value.trim(),nationality:patientNationality.value.trim(),sex:patientSex.value,unit:patientUnit.value.trim(),specialty:patientSpecialty.value.trim(),remarks:patientRemarks.value.trim(),serology:'',mobile:'',diagnosis:diagnosis.value.trim(),plannedProcedure:canonical,procedureEnteredAs:typed,surgeon:surgeonName.value.trim(),pathway:p,sendAnesthesia:send,emergencyOptimization:p==='emergency'?emergencyOptimization.value:'',minorProcedure:p==='minor',minorPoints:0,expectedDuration:+expectedDuration.value||60,prep,custom,requirements:{consent1:false,consent2:false,consent3:false,orRequest:false,admissionOrder:false},anesthesia:{status:'',doctor:'',type:'',notes:'',time:''},status:p==='emergency'?'or_ready':'patient_preparation',schedule:{date:'',time:'',orRoom:'',duration:+expectedDuration.value||60,admissionDate:'',admissionTime:'',arrivalPlace:''},admission:{status:'',bed:'',note:''},operation:{actualProcedure:'',actualSurgeon:'',points:0,basePoints:0,minorPoints:0,end:''},createdAt:now(),updatedAt:now(),audit:[]};audit(c,'Request Created',p==='emergency'?'Emergency → OR Ready':'Sent to Coordinator for Patient Preparation');if(typed!==canonical)audit(c,'Procedure Name Standardized',`${typed} → ${canonical}`);db.cases.unshift(c);save();[mrn,patientName,patientAge,patientNationality,patientUnit,patientSpecialty,patientRemarks,diagnosis,plannedProcedure,otherDepartment,additionalRequirement].forEach(x=>x.value='');patientSex.value='';PREP_KEYS.forEach(k=>$('req_'+k).checked=false);alert('Request created.');showPage('cases')};
+
+coordinatorClinicalDetailsUIV43=function(c){return `<div class="card"><div class="title"><h3>Final OR List Details</h3><span class="muted">Complete the data shown in the operating-room list</span></div><div class="grid g4"><div><label>Nationality</label><input id="coordNationalityV51" value="${esc(c.nationality||'')}"></div><div><label>Sex</label><select id="coordSexV51"><option value="">Select...</option><option value="M" ${c.sex==='M'?'selected':''}>Male</option><option value="F" ${c.sex==='F'?'selected':''}>Female</option></select></div><div><label>Unit</label><input id="coordUnitV51" value="${esc(c.unit||'')}"></div><div><label>Specialty</label><input id="coordSpecialtyV51" value="${esc(c.specialty||'')}"></div><div><label>Anesthesia Type</label><select id="coordAnesTypeV43"><option value="">Select...</option>${['General','Spinal','Local','Sedation','Regional'].map(x=>`<option value="${x}" ${c.anesthesia?.type===x?'selected':''}>${x}</option>`).join('')}</select></div><div><label>Anesthesiologist</label><input id="coordAnesthV43" value="${esc(c.anesthesia?.doctor||'')}"></div><div><label>Serology</label><select id="coordSerologyV51"><option value="">Select...</option><option value="Negative" ${c.serology==='Negative'?'selected':''}>Negative</option><option value="Positive" ${c.serology==='Positive'?'selected':''}>Positive</option><option value="Pending" ${c.serology==='Pending'?'selected':''}>Pending</option></select></div><div><label>Duration (minutes)</label><input id="coordDurationV51" type="number" min="15" step="15" value="${c.schedule?.duration||c.expectedDuration||60}"></div></div><label>Remarks</label><textarea id="coordRemarksV51">${esc(c.remarks||'')}</textarea><div class="actions"><button class="primary" onclick="saveCoordinatorClinicalV43('${c.id}')">Save OR List Details</button></div></div>`};
+saveCoordinatorClinicalV43=function(id){let c=db.cases.find(x=>x.id===id);if(!c)return;c.nationality=$('coordNationalityV51')?.value.trim()||'';c.sex=$('coordSexV51')?.value||'';c.unit=$('coordUnitV51')?.value.trim()||'';c.specialty=$('coordSpecialtyV51')?.value.trim()||'';c.serology=$('coordSerologyV51')?.value||'';c.remarks=$('coordRemarksV51')?.value.trim()||'';c.expectedDuration=+$('coordDurationV51')?.value||c.expectedDuration||60;c.schedule=c.schedule||{};c.schedule.duration=c.expectedDuration;c.anesthesia=c.anesthesia||{};c.anesthesia.doctor=$('coordAnesthV43')?.value.trim()||'';c.anesthesia.type=$('coordAnesTypeV43')?.value||'';c.prep=c.prep||{};c.prep.virology=c.prep.virology||{required:true,completed:false,order:99};c.prep.virology.required=true;c.prep.virology.completed=!!c.serology&&c.serology!=='Pending';audit(c,'Final OR List Details Updated',`Anesthesia: ${c.anesthesia.type||'—'} | Anesthesiologist: ${c.anesthesia.doctor||'—'} | Serology: ${c.serology||'—'}`);save(false);openCase(id);renderWeekly()};
+markReadyScheduling=function(id){let c=db.cases.find(x=>x.id===id);if(!c)return;let doctor=($('coordAnesthV43')?.value||c.anesthesia?.doctor||'').trim(),type=$('coordAnesTypeV43')?.value||c.anesthesia?.type||'',serology=$('coordSerologyV51')?.value||c.serology||'';if(!doctor)return alert('Enter the anesthesiologist.');if(!type)return alert('Select the anesthesia type.');if(!serology||serology==='Pending')return alert('Serology must be completed before the patient is ready for scheduling.');saveCoordinatorClinicalV43(id);c=db.cases.find(x=>x.id===id);c.status='ready_scheduling';audit(c,'Coordinator Final OR Check Completed','Ready for Scheduling');save(false);openCase(id);renderAll()};
+
+function roomCapacityV51(room,date){let v=+(db.roomCapacities?.[`${room.id}|${date}`]);return v>=0&&String(db.roomCapacities?.[`${room.id}|${date}`])!==''?v:(+room.slots||3)}
+function setRoomCapacityV51(roomId){if(roleSelect.value!=='coordinator')return;let room=db.rooms.find(r=>r.id===roomId),date=roomPlanDateV51.value;if(!room||!date)return;let current=roomCapacityV51(room,date),v=prompt(`Capacity for ${room.name} on ${prettyDateV41(date)}:`,current);if(v===null)return;v=Number(v);if(!Number.isInteger(v)||v<0)return alert('Enter a whole number of zero or more.');db.roomCapacities[`${room.id}|${date}`]=v;save(false);renderWeekly()}
+function addMinutesV51(t,min){let m=String(t||'08:00').match(/^(\d{2}):(\d{2})$/);if(!m)return'08:00';let n=(+m[1]*60 + +m[2] + (+min||0))%(24*60);return `${String(Math.floor(n/60)).padStart(2,'0')}:${String(n%60).padStart(2,'0')}`}
+function nextRoomTimeV51(roomId,date){let arr=db.assignments.filter(a=>a.roomId===roomId&&a.date===date).map(a=>db.cases.find(c=>c.id===a.caseId)).filter(Boolean).sort((a,b)=>String(a.schedule?.time||'').localeCompare(String(b.schedule?.time||'')));if(!arr.length)return'08:00';let last=arr[arr.length-1];return addMinutesV51(last.schedule?.time||'08:00',last.schedule?.duration||last.expectedDuration||60)}
+function eligibleForRoomV51(room){return db.cases.filter(c=>['ready_scheduling','or_ready'].includes(c.status)&&!db.assignments.some(a=>a.caseId===c.id)&&roomMatchesCaseV5(room,c)).sort((a,b)=>String(a.patientName).localeCompare(String(b.patientName)))}
+function openVacancyV51(roomId){if(roleSelect.value!=='coordinator')return;let room=db.rooms.find(r=>r.id===roomId),date=roomPlanDateV51.value;if(!room||!date)return;let patients=eligibleForRoomV51(room);modalTitle.textContent=`${room.name} — Vacant Slot`;modalBody.innerHTML=`<div class="card"><div class="title"><div><h3>Select a Ready Patient</h3><div class="muted">${prettyDateV41(date)} · Suggested start ${nextRoomTimeV51(roomId,date)}</div></div><button class="ghost" onclick="closeModal()">Close</button></div>${patients.map(c=>`<button class="ready-patient" onclick="choosePatientForRoomV51('${roomId}','${c.id}')"><b>${esc(c.patientName)}</b><div class="meta">MRN ${esc(c.mrn)} · ${esc(c.plannedProcedure)} · ${esc(c.surgeon)}</div></button>`).join('')||'<div class="notice">No ready patients match this room type.</div>'}</div>`;caseModal.classList.remove('hidden')}
+function choosePatientForRoomV51(roomId,caseId){if(roleSelect.value!=='coordinator')return;let room=db.rooms.find(r=>r.id===roomId),c=db.cases.find(x=>x.id===caseId),date=roomPlanDateV51.value;if(!room||!c||!date)return;let cap=roomCapacityV51(room,date),used=db.assignments.filter(a=>a.roomId===roomId&&a.date===date).length;if(used>=cap)return alert('This room has no vacancy.');let suggested=nextRoomTimeV51(roomId,date),time=prompt('Operation start time:',suggested);if(time===null)return;if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(time))return alert('Enter time as HH:MM.');db.assignments.push({id:uid(),roomId,date,caseId:c.id});c.schedule=c.schedule||{};c.schedule.date=date;c.schedule.time=time;c.schedule.orRoom=room.name;c.schedule.duration=c.schedule.duration||c.expectedDuration||60;if(c.status==='ready_scheduling')c.status=c.pathway==='elective'?'bed_pending':'scheduled';audit(c,'Assigned through Vacant OR Slot',`${prettyDateV41(date)} ${time} · ${room.name}`);save(false);closeModal();renderAll()}
+function orFieldV51(label,value,cls=''){return `<div class="or-field ${cls}"><b>${label}</b><span>${esc(value||'—')}</span></div>`}
+function roomCaseRowV51(a,index){let c=db.cases.find(x=>x.id===a.caseId);if(!c)return'';return `<div class="room-case"><div class="title"><div><span class="badge b-elective">${index+1}</span> <b>${esc(c.patientName)}</b></div><div class="room-case-time">${esc(c.schedule?.time||'—')}</div></div><div class="or-detail-grid">${orFieldV51('MRN',c.mrn)}${orFieldV51('Nationality',c.nationality)}${orFieldV51('Age',c.age)}${orFieldV51('Sex',c.sex)}${orFieldV51('Unit',c.unit)}${orFieldV51('Diagnosis',c.diagnosis)}${orFieldV51('Procedure',c.plannedProcedure,'patient-wide')}${orFieldV51('Surgeon',c.surgeon)}${orFieldV51('Specialty',c.specialty)}${orFieldV51('Anesthesia',c.anesthesia?.type)}${orFieldV51('Anesthesiologist',c.anesthesia?.doctor)}${orFieldV51('Duration',`${c.schedule?.duration||c.expectedDuration||'—'} min`)}${orFieldV51('Serology',c.serology)}${orFieldV51('Remarks',c.remarks,'patient-wide')}</div>${roleSelect.value==='coordinator'?`<div class="actions"><button class="secondary" onclick="openCase('${c.id}')">Edit Details</button><button class="danger" onclick="removeFromRoomV5('${a.id}')">Remove from Room</button></div>`:''}</div>`}
+renderWeekly=function(){ensureRoomsV5();let start=weekStart(getDateFieldV41(weekPicker)||localISO());setDateFieldV41(weekPicker,start);let dates=Array.from({length:5},(_,i)=>addDays(start,i));if(!roomPlanDateV51.value||!dates.includes(roomPlanDateV51.value))roomPlanDateV51.value=dates.includes(localISO())?localISO():start;let date=roomPlanDateV51.value;roomManager.classList.toggle('hidden',roleSelect.value!=='coordinator');let names=allSurgeons(),cur=weeklySurgeon.value;weeklySurgeon.innerHTML='<option value="">All Surgeons</option>'+names.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');if(names.includes(cur))weeklySurgeon.value=cur;let surg=weeklySurgeon.value,rooms=sortedRoomsV5();if(surg)rooms=rooms.filter(r=>db.assignments.some(a=>a.roomId===r.id&&a.date===date&&db.cases.find(c=>c.id===a.caseId)?.surgeon===surg));weeklyBody.innerHTML=`<div class="card"><div class="title"><h2>Final Operating Room List — ${prettyDateV41(date)}</h2><span class="muted">Click any vacant slot to select a ready patient</span></div></div>`+rooms.map(r=>{let arr=db.assignments.filter(a=>a.roomId===r.id&&a.date===date).filter(a=>!surg||db.cases.find(c=>c.id===a.caseId)?.surgeon===surg).sort((a,b)=>String(db.cases.find(c=>c.id===a.caseId)?.schedule?.time||'').localeCompare(String(db.cases.find(c=>c.id===b.caseId)?.schedule?.time||''))),cap=roomCapacityV51(r,date),free=Math.max(0,cap-arr.length),extra=Math.max(0,arr.length-cap);return `<div class="card room-v5 ${r.type==='day'?'day-room':''}"><div class="title"><div><h2>${esc(r.name)}</h2><div class="muted">${r.type==='day'?'Day Surgery Unit':'Main Operating Room'}</div></div><div class="room-capacity"><span class="badge">Capacity ${cap}</span><span class="badge ${free?'free':'full'}">${free?`${free} Vacant`:'Full'}</span>${extra?`<span class="badge full">${extra} Over Capacity</span>`:''}${roleSelect.value==='coordinator'?`<button class="secondary" onclick="setRoomCapacityV51('${r.id}')">Set Capacity</button>`:''}${roleSelect.value==='coordinator'&&!STANDARD_ROOMS_V5.some(x=>x.id===r.id)?`<button class="danger" onclick="deleteRoom('${r.id}')">Delete Room</button>`:''}</div></div>${arr.map(roomCaseRowV51).join('')}${Array.from({length:free},(_,i)=>roleSelect.value==='coordinator'?`<button class="vacant-slot" onclick="openVacancyV51('${r.id}')">＋ Vacant Slot ${arr.length+i+1} — Select Ready Patient</button>`:`<div class="vacant-slot" style="display:grid;place-items:center">Vacant Slot</div>`).join('')}</div>`}).join('')};
+
+function caseInfoCardV51(c){return `<div class="card"><div>${pathBadge(c)}</div><div class="or-detail-grid">${orFieldV51('Patient Name',c.patientName,'patient-wide')}${orFieldV51('MRN',c.mrn)}${orFieldV51('Nationality',c.nationality)}${orFieldV51('Age',c.age)}${orFieldV51('Sex',c.sex)}${orFieldV51('Unit',c.unit)}${orFieldV51('Diagnosis',c.diagnosis)}${orFieldV51('Procedure',c.plannedProcedure,'patient-wide')}${orFieldV51('Surgeon',c.surgeon)}${orFieldV51('Specialty',c.specialty)}${orFieldV51('Anesthesia',c.anesthesia?.type)}${orFieldV51('Anesthesiologist',c.anesthesia?.doctor)}${orFieldV51('Start',c.schedule?.time)}${orFieldV51('Duration',`${c.schedule?.duration||c.expectedDuration||'—'} min`)}${orFieldV51('Serology',c.serology)}${orFieldV51('Remarks',c.remarks,'patient-wide')}</div></div>`}
+openCase=function(id){let c=db.cases.find(x=>x.id===id);if(!c)return;modalTitle.textContent=c.patientName+' — '+c.id;let h=caseInfoCardV51(c),r=roleSelect.value;if(r==='surgeon')h+=surgeonUI(c);if(r==='coordinator'){if(c.status==='patient_preparation')h+=coordinatorPrepUI(c);if(c.status==='coordinator_final_check')h+=coordinatorFinalUI(c);if(c.status==='ready_scheduling')h+=schedulingUI(c);h+=coordinatorRescheduleUIV41(c);h+=coordinatorClinicalDetailsUIV43(c)}if(r==='anesthesia')h+=anesthesiaUI(c);if(r==='admission')h+=admissionUI(c);if(r==='or')h+=orUI(c);if(r==='admin')h+=`<div class="card muted">Administrative view only.</div>`;h+=`<div class="card"><h3>Timeline / Audit Trail</h3><div class="timeline">${[...(c.audit||[])].reverse().map(a=>`<div class="event"><b>${esc(a.action)}</b><div class="meta">${new Date(a.time).toLocaleString('en-GB')} · ${esc(a.role)}</div>${a.note?`<div>${esc(a.note)}</div>`:''}</div>`).join('')}</div></div>`;modalBody.innerHTML=h;caseModal.classList.remove('hidden');document.querySelectorAll('.fixed-date').forEach(attachCalendarV42)};
+
+const renderAllV5Base=renderAll;renderAll=function(){ensureRoomsV5();renderAllV5Base();renderTrashV5()};
+const ROOM_DAY_NAMES_V52=['Sunday','Monday','Tuesday','Wednesday','Thursday'];
+function selectRoomDayV52(date){roomPlanDateV51.value=date;renderWeekly()}
+function renderRoomDayFilterV52(){if(!$('roomDayFilterV52'))return;let start=weekStart(getDateFieldV41(weekPicker)||localISO()),selected=roomPlanDateV51.value;roomDayFilterV52.innerHTML=ROOM_DAY_NAMES_V52.map((name,i)=>{let date=addDays(start,i);return `<button class="${selected===date?'active':''}" onclick="selectRoomDayV52('${date}')"><b>${name}</b><span>${prettyDateV41(date)}</span></button>`}).join('')}
+const renderWeeklyV52Base=renderWeekly;renderWeekly=function(){renderWeeklyV52Base();renderRoomDayFilterV52()};
+
+// V5.3 — administration may manage the room plan; cancel/return actions require a reason.
+function canManageRoomPlanV53(){return ['coordinator','admin'].includes(roleSelect.value)}
+function detachFromOperatingPlanV53(c){
+  db.assignments=db.assignments.filter(a=>a.caseId!==c.id);c.schedule=c.schedule||{};
+  for(const k of ['date','time','orRoom','admissionDate','admissionTime','arrivalPlace'])c.schedule[k]='';
+  c.admission={status:'',bed:'',note:''};
+}
+function cancelCaseV53(id){
+  if(!canManageRoomPlanV53())return alert('Only the coordinator or administration can cancel a case.');
+  let c=db.cases.find(x=>x.id===id);if(!c)return;
+  let reason=prompt('Cancellation reason (required):','');if(reason===null)return;reason=reason.trim();if(!reason)return alert('Enter the cancellation reason.');
+  if(!confirm(`Cancel the case for ${c.patientName}?`))return;
+  detachFromOperatingPlanV53(c);c.status='cancelled';c.cancellation={reason,time:now(),role:roleSelect.value};
+  audit(c,'Case Cancelled',reason);save(false);closeModal();renderAll();
+}
+function returnCaseToSurgeonV53(id){
+  if(!canManageRoomPlanV53())return alert('Only the coordinator or administration can return a case to the surgeon.');
+  let c=db.cases.find(x=>x.id===id);if(!c)return;
+  let reason=prompt('Reason for returning to the surgeon (required):','');if(reason===null)return;reason=reason.trim();if(!reason)return alert('Enter the reason for returning the case.');
+  if(!confirm(`Return ${c.patientName} to the surgeon for new preparation?`))return;
+  detachFromOperatingPlanV53(c);c.returnRequest={target:'surgeon',reason,time:now(),role:roleSelect.value,resolved:false};
+  resetForSurgeonRepreparationV491(c);c.status='surgeon_repreparation';audit(c,'Returned to Surgeon for Re-preparation',reason);
+  save(false);closeModal();renderAll();
+}
+function casePlanActionsV53(c,assignmentId=''){
+  if(!canManageRoomPlanV53()||['completed','cancelled'].includes(c.status))return'';
+  return `<div class="actions"><button class="warn" onclick="returnCaseToSurgeonV53('${c.id}')">Return to Surgeon</button><button class="danger" onclick="cancelCaseV53('${c.id}')">Cancel Case</button>${assignmentId?`<button class="secondary" onclick="removeFromRoomV5('${assignmentId}')">Remove from Room</button>`:''}</div>`;
+}
+addRoom=function(){if(!canManageRoomPlanV53())return;let name=roomName.value.trim();if(!name)return alert('Enter the room name.');if(db.rooms.some(r=>String(r.name).toLowerCase()===name.toLowerCase()))return alert('This room already exists.');db.rooms.push({id:uid(),name,type:roomType.value,slots:+roomSlots.value||0});roomName.value='';save(false);renderWeekly()};
+deleteRoom=function(id){if(!canManageRoomPlanV53())return;if(STANDARD_ROOMS_V5.some(r=>r.id===id))return alert('Standard rooms R1–R8 and DSU1–DSU4 cannot be deleted.');if(db.assignments.some(a=>a.roomId===id))return alert('Remove patients from this room first.');db.rooms=db.rooms.filter(r=>r.id!==id);save(false);renderWeekly()};
+setRoomCapacityV51=function(roomId){if(!canManageRoomPlanV53())return;let room=db.rooms.find(r=>r.id===roomId),date=roomPlanDateV51.value;if(!room||!date)return;let current=roomCapacityV51(room,date),v=prompt(`Capacity for ${room.name} on ${prettyDateV41(date)}:`,current);if(v===null)return;v=Number(v);if(!Number.isInteger(v)||v<0)return alert('Enter a whole number of zero or more.');db.roomCapacities[`${room.id}|${date}`]=v;save(false);renderWeekly()};
+openVacancyV51=function(roomId){
+  if(!canManageRoomPlanV53())return alert('Switch to Coordinator or Administration to assign patients to rooms.');
+  let room=db.rooms.find(r=>r.id===roomId),date=roomPlanDateV51.value;if(!room||!date)return alert('Select an operating day first.');
+  let patients=eligibleForRoomV51(room);if(!patients.length){let ready=db.cases.filter(c=>['ready_scheduling','or_ready'].includes(c.status)&&!db.assignments.some(a=>a.caseId===c.id));return alert(ready.length?(room.type==='day'?'No ready Day Surgery patients are available for this DSU room.':'No ready Elective/Inpatient patients are available for this main operating room.'):'There are currently no ready patients available for room assignment.');}
+  modalTitle.textContent=`${room.name} — Vacant Slot`;modalBody.innerHTML=`<div class="card"><div class="title"><div><h3>Select a Ready Patient</h3><div class="muted">${prettyDateV41(date)} · Suggested start ${nextRoomTimeV51(roomId,date)}</div></div><button class="ghost" onclick="closeModal()">Close</button></div>${patients.map(c=>`<button class="ready-patient" onclick="choosePatientForRoomV51('${roomId}','${c.id}')"><b>${esc(c.patientName)}</b><div class="meta">MRN ${esc(c.mrn)} · ${esc(c.plannedProcedure)} · ${esc(c.surgeon)}</div></button>`).join('')}</div>`;caseModal.classList.remove('hidden');
+};
+choosePatientForRoomV51=function(roomId,caseId){if(!canManageRoomPlanV53())return;let room=db.rooms.find(r=>r.id===roomId),c=db.cases.find(x=>x.id===caseId),date=roomPlanDateV51.value;if(!room||!c||!date)return;let cap=roomCapacityV51(room,date),used=db.assignments.filter(a=>a.roomId===roomId&&a.date===date).length;if(used>=cap)return alert('This room has no vacancy.');let suggested=nextRoomTimeV51(roomId,date),time=prompt('Operation start time:',suggested);if(time===null)return;if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(time))return alert('Enter time as HH:MM.');db.assignments.push({id:uid(),roomId,date,caseId:c.id});c.schedule=c.schedule||{};c.schedule.date=date;c.schedule.time=time;c.schedule.orRoom=room.name;c.schedule.duration=c.schedule.duration||c.expectedDuration||60;if(c.status==='ready_scheduling')c.status=c.pathway==='elective'?'bed_pending':'scheduled';audit(c,'Assigned through Vacant OR Slot',`${prettyDateV41(date)} ${time} · ${room.name}`);save(false);closeModal();renderAll()};
+removeFromRoomV5=function(id){if(!canManageRoomPlanV53())return;let a=db.assignments.find(x=>x.id===id),c=a&&db.cases.find(x=>x.id===a.caseId);if(!a)return;if(!confirm('Remove this patient from the room and return the case to Ready for Scheduling?'))return;db.assignments=db.assignments.filter(x=>x.id!==id);if(c){c.schedule=c.schedule||{};for(const k of ['date','time','orRoom','admissionDate','admissionTime','arrivalPlace'])c.schedule[k]='';c.admission={status:'',bed:'',note:''};c.status='ready_scheduling';audit(c,'Removed from OR Schedule','Returned to Ready for Scheduling')}save(false);closeModal();renderAll()};
+function roomCaseRowV53(a,index){let c=db.cases.find(x=>x.id===a.caseId);if(!c)return'';return `<div class="room-case"><div class="title"><div><span class="badge b-elective">${index+1}</span> <b>${esc(c.patientName)}</b></div><div class="room-case-time">${esc(c.schedule?.time||'—')}</div></div><div class="or-detail-grid">${orFieldV51('MRN',c.mrn)}${orFieldV51('Nationality',c.nationality)}${orFieldV51('Age',c.age)}${orFieldV51('Sex',c.sex)}${orFieldV51('Unit',c.unit)}${orFieldV51('Diagnosis',c.diagnosis)}${orFieldV51('Procedure',c.plannedProcedure,'patient-wide')}${orFieldV51('Surgeon',c.surgeon)}${orFieldV51('Specialty',c.specialty)}${orFieldV51('Anesthesia',c.anesthesia?.type)}${orFieldV51('Anesthesiologist',c.anesthesia?.doctor)}${orFieldV51('Duration',`${c.schedule?.duration||c.expectedDuration||'—'} min`)}${orFieldV51('Serology',c.serology)}${orFieldV51('Remarks',c.remarks,'patient-wide')}</div>${canManageRoomPlanV53()?`<div class="actions"><button class="secondary" onclick="openCase('${c.id}')">View Details</button></div>${casePlanActionsV53(c,a.id)}`:''}</div>`}
+renderWeekly=function(){ensureRoomsV5();let start=weekStart(getDateFieldV41(weekPicker)||localISO());setDateFieldV41(weekPicker,start);let dates=Array.from({length:5},(_,i)=>addDays(start,i));if(!roomPlanDateV51.value||!dates.includes(roomPlanDateV51.value))roomPlanDateV51.value=dates.includes(localISO())?localISO():start;let date=roomPlanDateV51.value;roomManager.classList.toggle('hidden',!canManageRoomPlanV53());let names=allSurgeons(),cur=weeklySurgeon.value;weeklySurgeon.innerHTML='<option value="">All Surgeons</option>'+names.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');if(names.includes(cur))weeklySurgeon.value=cur;let surg=weeklySurgeon.value,rooms=sortedRoomsV5();if(surg)rooms=rooms.filter(r=>db.assignments.some(a=>a.roomId===r.id&&a.date===date&&db.cases.find(c=>c.id===a.caseId)?.surgeon===surg));weeklyBody.innerHTML=`<div class="card"><div class="title"><h2>Final Operating Room List — ${prettyDateV41(date)}</h2><span class="muted">Click any vacant slot to select a ready patient</span></div></div>`+rooms.map(r=>{let arr=db.assignments.filter(a=>a.roomId===r.id&&a.date===date).filter(a=>!surg||db.cases.find(c=>c.id===a.caseId)?.surgeon===surg).sort((a,b)=>String(db.cases.find(c=>c.id===a.caseId)?.schedule?.time||'').localeCompare(String(db.cases.find(c=>c.id===b.caseId)?.schedule?.time||''))),cap=roomCapacityV51(r,date),free=Math.max(0,cap-arr.length),extra=Math.max(0,arr.length-cap);return `<div class="card room-v5 ${r.type==='day'?'day-room':''}"><div class="title"><div><h2>${esc(r.name)}</h2><div class="muted">${r.type==='day'?'Day Surgery Unit':'Main Operating Room'}</div></div><div class="room-capacity"><span class="badge">Capacity ${cap}</span><span class="badge ${free?'free':'full'}">${free?`${free} Vacant`:'Full'}</span>${extra?`<span class="badge full">${extra} Over Capacity</span>`:''}${canManageRoomPlanV53()?`<button class="secondary" onclick="setRoomCapacityV51('${r.id}')">Set Capacity</button>`:''}${canManageRoomPlanV53()&&!STANDARD_ROOMS_V5.some(x=>x.id===r.id)?`<button class="danger" onclick="deleteRoom('${r.id}')">Delete Room</button>`:''}</div></div>${arr.map(roomCaseRowV53).join('')}${Array.from({length:free},(_,i)=>canManageRoomPlanV53()?`<button class="vacant-slot" onclick="openVacancyV51('${r.id}')">＋ Vacant Slot ${arr.length+i+1} — Select Ready Patient</button>`:`<div class="vacant-slot" style="display:grid;place-items:center">Vacant Slot</div>`).join('')}</div>`}).join('');renderRoomDayFilterV52()};
+openCase=function(id){let c=db.cases.find(x=>x.id===id);if(!c)return;modalTitle.textContent=c.patientName+' — '+c.id;let h=caseInfoCardV51(c),r=roleSelect.value;if(c.cancellation?.reason)h+=`<div class="return-reason"><b>Cancellation Reason</b><div>${esc(c.cancellation.reason)}</div><div class="meta">${new Date(c.cancellation.time).toLocaleString('en-GB')} · ${esc(c.cancellation.role)}</div></div>`;if(r==='surgeon')h+=surgeonUI(c);if(r==='coordinator'){if(c.status==='patient_preparation')h+=coordinatorPrepUI(c);if(c.status==='coordinator_final_check')h+=coordinatorFinalUI(c);if(c.status==='ready_scheduling')h+=schedulingUI(c);h+=coordinatorRescheduleUIV41(c);h+=coordinatorClinicalDetailsUIV43(c)}if(r==='anesthesia')h+=anesthesiaUI(c);if(r==='admission')h+=admissionUI(c);if(r==='or')h+=orUI(c);if(r==='admin')h+=`<div class="card muted">Administration may manage room assignments, cancellation, and return to surgeon.</div>`;h+=casePlanActionsV53(c);h+=`<div class="card"><h3>Timeline / Audit Trail</h3><div class="timeline">${[...(c.audit||[])].reverse().map(a=>`<div class="event"><b>${esc(a.action)}</b><div class="meta">${new Date(a.time).toLocaleString('en-GB')} · ${esc(a.role)}</div>${a.note?`<div>${esc(a.note)}</div>`:''}</div>`).join('')}</div></div>`;modalBody.innerHTML=h;caseModal.classList.remove('hidden');document.querySelectorAll('.fixed-date').forEach(attachCalendarV42)};
+backup=function(){let b=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='Surgical_Pathway_Manager_V5_Backup_'+localISO()+'.json';a.click()};
+
+
+// Operations Database V2 — read-only Google Sheet sync prototype.
+function remotePathwayV2(v){
+  v=String(v||'').trim().toLowerCase();
+  if(v.includes('day'))return 'day';
+  if(v.includes('inpatient'))return 'inpatient';
+  if(v.includes('emergency'))return 'emergency';
+  return 'elective';
+}
+function remoteStatusV2(v){
+  v=String(v||'').trim().toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+  const map={ready:'ready_scheduling',ready_for_scheduling:'ready_scheduling',patient_preparation:'patient_preparation',awaiting_anesthesia:'awaiting_anesthesia',anesthesia_deferred:'anesthesia_deferred',surgeon_final_documents:'surgeon_final_documents',coordinator_final_or_check:'coordinator_final_check',coordinator_final_check:'coordinator_final_check',scheduled:'scheduled',bed_pending:'bed_pending',bed_arranged:'bed_arranged',admitted:'admitted',or_ready:'or_ready',in_or:'in_or',completed:'completed',cancelled:'cancelled'};
+  return map[v]||'patient_preparation';
+}
+function remoteCaseV2(r){
+  const duration=Number(r.expectedDuration)||60;
+  return {
+    id:String(r.id||uid()),mrn:String(r.mrn||''),patientName:String(r.patientName||''),age:String(r.age||''),
+    nationality:String(r.nationality||''),sex:String(r.sex||''),unit:String(r.unit||''),specialty:String(r.specialty||''),
+    remarks:String(r.remarks||''),serology:String(r.serology||''),mobile:'',diagnosis:String(r.diagnosis||''),
+    plannedProcedure:String(r.plannedProcedure||''),procedureEnteredAs:String(r.plannedProcedure||''),surgeon:String(r.surgeon||''),
+    pathway:remotePathwayV2(r.pathway),sendAnesthesia:true,emergencyOptimization:'',minorProcedure:false,minorPoints:0,expectedDuration:duration,
+    prep:{ecg:{required:false,completed:false,order:1},cxr:{required:false,completed:false,order:2},cbc:{required:false,completed:false,order:3},bio:{required:false,completed:false,order:4},virology:{required:false,completed:!!r.serology,order:5},cardiology:{required:false,completed:false,order:6},other:{required:false,completed:false,order:7}},
+    custom:[],requirements:{consent1:false,consent2:false,consent3:false,orRequest:false,admissionOrder:false},
+    anesthesia:{status:'',doctor:'',type:'',notes:'',time:''},status:remoteStatusV2(r.status),
+    schedule:{date:String(r.scheduleDate||'').slice(0,10),time:String(r.scheduleTime||'').slice(0,5),orRoom:String(r.orRoom||''),duration:duration,admissionDate:'',admissionTime:'',arrivalPlace:''},
+    admission:{status:'',bed:'',note:''},operation:{actualProcedure:'',actualSurgeon:'',points:0,basePoints:0,minorPoints:0,end:''},
+    createdAt:String(r.createdAt||now()),updatedAt:String(r.updatedAt||now()),audit:[{time:now(),role:'sync',action:'Imported from Google Sheet',note:'Read-only V2 sync'}]
+  };
+}
+async function syncCasesFromGoogle(){
+  const el=$('cloudSyncStatus');
+  if(el)el.textContent='Connecting to Google Sheet…';
+  try{
+    const res=await fetch(OPERATIONS_API_URL,{method:'GET',credentials:'include',cache:'no-store',redirect:'follow'});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const text=await res.text();
+    let data;try{data=JSON.parse(text)}catch(e){throw new Error('Google returned a sign-in page instead of JSON');}
+    if(!data.success||!Array.isArray(data.cases))throw new Error(data.error||'Invalid API response');
+    db.cases=data.cases.map(remoteCaseV2);
+    db.assignments=[];
+    db.deletedCases=[];
+    localStorage.setItem(KEY,JSON.stringify(db));
+    renderAll();
+    if(el)el.textContent=`Synced ${db.cases.length} case(s) · ${new Date().toLocaleTimeString()}`;
+  }catch(err){
+    console.error('Google Sheet sync failed',err);
+    if(el)el.textContent='Sync failed: '+err.message;
+  }
+}
+
+try{renderAll();}catch(e){console.error(e)}
+</script>
+</body>
+</html>
